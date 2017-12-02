@@ -23,7 +23,7 @@ while True:
     pressed_mouse = pygame.mouse.get_pressed()
     if pressed_mouse[0]:
         mouse_pos = pygame.mouse.get_pos()
-        bullet = bullet_class.OrdinaryBullet(screen)
+        bullet = bullet_class.ElectricityBullet(screen)
         bullet.fired(mouse_pos[0], mouse_pos[1])
         bullet_group.add(bullet)
 

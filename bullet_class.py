@@ -28,12 +28,12 @@ class OrdinaryBullet(Bullet):
         self.hurt_num = 2
         self.fly_speed = 300
         self.fly_distance = 200
-        self.image_name = "source_material/bullet/Ordinary.png"
+        self.image_name = "source_material/bullet/ordinary.png"
         self.birth_pos = None
 
     # 参数为子弹产生的位置
     def fired(self, pos_x, pos_y):
-        self.load(self.image_name, 12, 8, 1)
+        self.load(self.image_name, 12, 12, 1)
         self.position = Vector2(pos_x, pos_y)
         self.rect = Rect(pos_x - self.frame_width / 2, pos_y - self.frame_height / 2, pos_x + self.frame_width / 2, pos_y + self.frame_height / 2)
         self.birth_pos = Vector2(pos_x, pos_y)
@@ -44,7 +44,7 @@ class OrdinaryBullet(Bullet):
         else:
             return False
 
-    def update(self, current_time, time_passed, direction, rate = 60):
+    def update(self, current_time, time_passed, direction, rate=60):
         if direction == "up":
             dire = Vector2(0, -1)
         elif direction == "down":
@@ -57,14 +57,7 @@ class OrdinaryBullet(Bullet):
         self.position.y += self.fly_speed * time_passed * dire.y
         center = Vector2(self.frame_width / 2, self.frame_height / 2)
         self.rect = self.position.x - center.x, self.position.y - center.y, self.position.x + center.x, self.position.y + center.y
-
-        '''print("w:"+str(self.rect))
-        self.rect = self.rect.move(self.fly_speed * time_passed * dire.x, self.fly_speed * time_passed * dire.y)
-        print("w:"+str(self.rect))
-        self.position.x = (self.rect.left + self.rect.right) / 2
-        self.position.y = (self.rect.top + self.rect.bottom) / 2'''
-
-        if current_time > self.last_time + rate:
+        if current_time > (self.last_time + rate):
             self.frame += 1
             if self.frame > self.last_frame:
                 self.frame = self.frist_frame
@@ -86,3 +79,62 @@ class OrdinaryBullet(Bullet):
             self.old_frame = self.frame
 
 
+class SpecialBullet(Bullet):
+    def __init__(self, screen):
+        Bullet.__init__(self, screen)
+        self.hurt_num = 2
+        self.image_name = None
+
+    def fired(self, pos_x, pos_y):
+        self.load(self.image_name, 24, 96, 4)
+        self.position = Vector2(pos_x, pos_y)
+        self.rect = Rect(pos_x - self.frame_width / 2, pos_y, pos_x + self.frame_width / 2, pos_y + self.frame_height)
+
+    def loss(self):
+        if self.old_frame == self.last_frame:
+            return True
+        else:
+            return False
+
+    def update(self, current_time, time_passed, direction, rate=120):
+        if current_time > self.last_time + rate:
+            self.frame += 1
+            if self.frame > self.last_frame:
+                self.frame = self.frist_frame
+            self.last_time = current_time
+
+        if self.frame != self.old_frame:
+            frame_x = (self.frame % self.columns) * self.frame_width
+            frame_y = (self.frame // self.columns) * self.frame_height
+            rect = Rect((frame_x, frame_y, self.frame_width,self.frame_height))
+            image = self.master_image.subsurface(rect)
+            if direction == "up":
+                self.image = pygame.transform.rotate(image, 180.)
+                self.rect = Rect(self.position.x - self.frame_width / 2, self.position.y - self.frame_height, self.position.x + self.frame_width / 2, self.position.y)
+            elif direction == "down":
+                self.image = image
+            elif direction == "left":
+                self.image = pygame.transform.rotate(image, 270.)
+                self.rect = Rect(self.position.x - self.frame_height, self.position.y - self.frame_width / 2, self.position.x, self.position.y + self.frame_width / 2)
+            elif direction == "right":
+                self.image = pygame.transform.rotate(image, 90.)
+                self.rect = Rect(self.position.x, self.position.y - self.frame_width / 2, self.position.x + self.frame_height, self.position.y + self.frame_width / 2)
+            self.old_frame = self.frame
+
+
+class FireBullet(SpecialBullet):
+    def __init__(self, screen):
+        SpecialBullet.__init__(self, screen)
+        self.image_name = "source_material/bullet/fire.png"
+
+
+class IceBullet(SpecialBullet):
+    def __init__(self, screen):
+        SpecialBullet.__init__(self, screen)
+        self.image_name = "source_material/bullet/ice.png"
+
+
+class ElectricityBullet(SpecialBullet):
+    def __init__(self, screen):
+        SpecialBullet.__init__(self, screen)
+        self.image_name = "source_material/bullet/electricity.png"
