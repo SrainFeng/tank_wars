@@ -6,6 +6,8 @@ class TankSprite(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         # 目标 surface ，该精灵会贴入目标 surface
         self.target_surface = screen
+        # 记录图像路径
+        self.image_name = None
         # 该精灵的总图像
         self.master_image = None
         # 每一帧的宽和高
@@ -23,9 +25,9 @@ class TankSprite(pygame.sprite.Sprite):
         self.last_time = 0
         # 记录总图像帧的列数
         self.columns = 1
-        # 记录精灵的位置的矩形
+        # 记录精灵的位置的矩形和向量
         self.rect = None
-        self.speed = 0
+        self.position = None
 
         # 要求使用参数初始化一些类的属性
     def load(self, image_name, width, height, column):

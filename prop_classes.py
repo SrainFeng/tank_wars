@@ -1,0 +1,126 @@
+import tank_sprite
+from pygame.locals import *
+from gameobjects.vector2 import Vector2
+
+
+class Prop(tank_sprite.TankSprite):
+    def __init__(self, screen):
+        tank_sprite.TankSprite.__init__(self, screen)
+        # 道具存在的时间
+        self.keep_time = 0
+        self.birth_time = 0
+        # 记录位置，为二维向量
+        self.position = None
+
+    # 产生一个道具，参数为生成的坐标
+    def produce(self):
+        pass
+
+    # 道具自动消失（存在时限到）
+    def loss(self, current_time):
+        if current_time - self.birth_time >= self.keep_time:
+            return True
+        else:
+            return False
+
+    def update(self, current_time, rate=90):
+        if current_time - self.last_time >= rate:
+            self.frame += 1
+            if self.frame == self.last_frame:
+                self.frame = self.frist_frame
+            self.last_time = current_time
+
+        if self.frame != self.old_frame:
+            frame_x = (self.frame % self.columns) * self.frame_width
+            frame_y = (self.frame // self.columns) * self.frame_height
+            rect = Rect((frame_x, frame_y, self.frame_width,self.frame_height))
+            self.image = self.master_image.subsurface(rect)
+
+
+# 攻击道具的父类（各种特殊子弹以及射速提升道具）
+class AttackProp(Prop):
+    def __init__(self, screen):
+        Prop.__init__(self, screen)
+        self.keep_time = 25000
+
+    def produce(self, pos_x, pos_y, current_time):
+        self.load(self.image_name, 32, 32, 3)
+        self.position = Vector2(pos_x, pos_y)
+        self.rect = Rect(pos_x - self.frame_width / 2, pos_y - self.frame_height / 2, pos_x + self.frame_width / 2, pos_y + self.frame_height / 2)
+        self.birth_time = current_time
+
+
+# 各种其他道具的父类（坦克回复、生命和移速；基地回复；金币）
+class OtherProp(Prop):
+    def __init__(self, screen):
+        Prop.__init__(self, screen)
+        self.keep_time = 20000
+
+    def produce(self, pos_x, pos_y, current_time):
+        self.load(self.image_name, 32, 32, 4)
+        self.position = Vector2(pos_x, pos_y)
+        self.rect = Rect(pos_x - self.frame_width / 2, pos_y - self.frame_height / 2, pos_x + self.frame_width / 2, pos_y + self.frame_height / 2)
+        self.birth_time = current_time
+
+
+# 电弹道具
+class ElectricityProp(AttackProp):
+    def __init__(self, screen):
+        AttackProp.__init__(self, screen)
+        self.image_name = "source_material/prop/electricity.png"
+
+
+# 火焰弹道具
+class FireProp(AttackProp):
+    def __init__(self, screen):
+        AttackProp.__init__(self, screen)
+        self.image_name = "source_material/prop/fire.png"
+
+
+# 冰弹道具
+class IceProp(AttackProp):
+    def __init__(self, screen):
+        AttackProp.__init__(self, screen)
+        self.image_name = "source_material/prop/ice.png"
+
+
+# 攻速加成道具
+class HitSpeedProp(AttackProp):
+    def __init__(self, screen):
+        AttackProp.__init__(self, screen)
+        self.image_name = "source_material/prop/hit_speed.png"
+
+
+# HP回复道具
+class HPProp(OtherProp):
+    def __init__(self, screen):
+        OtherProp.__init__(self, screen)
+        self.image_name = "source_material/prop/HP.png"
+
+
+# 生命数增加道具
+class LifeProp(OtherProp):
+    def __init__(self, screen):
+        OtherProp.__init__(self, screen)
+        self.image_name = "source_material/prop/life.png"
+
+
+# 移速加成道具
+class MoveSpeedProp(OtherProp):
+    def __init__(self, screen):
+        OtherProp.__init__(self, screen)
+        self.image_name = "source_material/prop/move_speed.png"
+
+
+# 基地HP回复道具
+class BaseHPProp(OtherProp):
+    def __init__(self, screen):
+        OtherProp.__init__(self, screen)
+        self.image_name = "source_material/prop/base_HP.png"
+
+
+# 金币道具
+class CoinProp(OtherProp):
+    def __init__(self, screen):
+        OtherProp.__init__(self, screen)
+        self.image_name = "source_material/prop/coin.png"
