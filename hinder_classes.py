@@ -18,7 +18,7 @@ class Hinder(tank_sprite.TankSprite):
 class DestroyableHinder(Hinder):
     def __init__(self, screen):
         Hinder.__init__(self, screen)
-        self.HP = 20
+        self.HP = 4
 
     def put(self, pos):
         self.load(self.image_name, 64, 64, 1)

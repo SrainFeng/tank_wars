@@ -1,4 +1,4 @@
-import bullet_class
+import bullet_classes
 import pygame
 from pygame.locals import *
 from gameobjects.vector2 import Vector2
@@ -24,7 +24,7 @@ while True:
     pressed_mouse = pygame.mouse.get_pressed()
     if pressed_mouse[0]:
         mouse_pos = pygame.mouse.get_pos()
-        bullet = bullet_class.ElectricityBullet(screen)
+        bullet = bullet_classes.ElectricityBullet(screen)
         bullet.fired(Vector2(mouse_pos[0], mouse_pos[1]))
         bullet_group.add(bullet)
 
