@@ -1,6 +1,7 @@
 import bullet_class
 import pygame
 from pygame.locals import *
+from gameobjects.vector2 import Vector2
 
 pygame.init()
 screen = pygame.display.set_mode((800, 458), 0, 32)
@@ -24,14 +25,14 @@ while True:
     if pressed_mouse[0]:
         mouse_pos = pygame.mouse.get_pos()
         bullet = bullet_class.ElectricityBullet(screen)
-        bullet.fired(mouse_pos[0], mouse_pos[1])
+        bullet.fired(Vector2(mouse_pos[0], mouse_pos[1]))
         bullet_group.add(bullet)
 
     for b in bullet_group.sprites():
-        if b.loss():
+        if b.is_loss():
             bullet_group.remove(b)
 
     screen.blit(background, (0, 0))
-    bullet_group.update(current_time, "right")
+    bullet_group.update(current_time, "down")
     bullet_group.draw(screen)
     pygame.display.update()

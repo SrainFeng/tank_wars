@@ -17,7 +17,7 @@ class Bullet(tank_sprite.TankSprite):
         pass
 
     # 子弹自动消失（达到射程或者是帧动画播放完了）
-    def loss(self):
+    def is_loss(self):
         pass
 
 
@@ -32,13 +32,13 @@ class OrdinaryBullet(Bullet):
         self.birth_pos = None
 
     # 参数为子弹产生的位置
-    def fired(self, pos_x, pos_y):
+    def fired(self, pos):
         self.load(self.image_name, 12, 12, 1)
-        self.position = Vector2(pos_x, pos_y)
-        self.rect = Rect(pos_x - self.frame_width / 2, pos_y - self.frame_height / 2, pos_x + self.frame_width / 2, pos_y + self.frame_height / 2)
-        self.birth_pos = Vector2(pos_x, pos_y)
+        self.position = Vector2(pos.x, pos.y)
+        self.rect = Rect(pos.x - self.frame_width / 2, pos.y - self.frame_height / 2, self.frame_width, self.frame_height)
+        self.birth_pos = Vector2(pos.x, pos.y)
 
-    def loss(self):
+    def is_loss(self):
         if (self.position - self.birth_pos).get_length() >= self.fly_distance:
             return True
         else:
@@ -54,10 +54,9 @@ class OrdinaryBullet(Bullet):
             dire = Vector2(-1, 0)
         elif direction == "right":
             dire = Vector2(1, 0)
-        self.position.x += self.fly_speed * time_passed * dire.x
-        self.position.y += self.fly_speed * time_passed * dire.y
-        center = Vector2(self.frame_width / 2, self.frame_height / 2)
-        self.rect = self.position.x - center.x, self.position.y - center.y, self.position.x + center.x, self.position.y + center.y
+        self.rect = self.rect.move(self.fly_speed * time_passed * dire.x, self.fly_speed * time_passed * dire.y)
+        self.position.x = (self.rect.left + self.rect.right) / 2
+        self.position.y = (self.rect.top + self.rect.bottom) / 2
         if current_time > (self.last_time + rate):
             self.frame += 1
             if self.frame > self.last_frame:
@@ -84,14 +83,13 @@ class OrdinaryBullet(Bullet):
 class SpecialBullet(Bullet):
     def __init__(self, screen):
         Bullet.__init__(self, screen)
-        self.hurt_num = 2
 
-    def fired(self, pos_x, pos_y):
+    def fired(self, pos):
         self.load(self.image_name, 24, 96, 4)
-        self.position = Vector2(pos_x, pos_y)
-        self.rect = Rect(pos_x - self.frame_width / 2, pos_y, pos_x + self.frame_width / 2, pos_y + self.frame_height)
+        self.position = Vector2(pos.x, pos.y)
+        self.rect = Rect(pos.x - self.frame_width / 2, pos.y, self.frame_width, self.frame_height)
 
-    def loss(self):
+    def is_loss(self):
         if self.old_frame == self.last_frame:
             return True
         else:
@@ -107,19 +105,19 @@ class SpecialBullet(Bullet):
         if self.frame != self.old_frame:
             frame_x = (self.frame % self.columns) * self.frame_width
             frame_y = (self.frame // self.columns) * self.frame_height
-            rect = Rect((frame_x, frame_y, self.frame_width,self.frame_height))
+            rect = Rect((frame_x, frame_y, self.frame_width, self.frame_height))
             image = self.master_image.subsurface(rect)
             if direction == "up":
                 self.image = pygame.transform.rotate(image, 180.)
-                self.rect = Rect(self.position.x - self.frame_width / 2, self.position.y - self.frame_height, self.position.x + self.frame_width / 2, self.position.y)
+                self.rect = Rect(self.position.x - self.frame_width / 2, self.position.y - self.frame_height, self.frame_width, self.frame_height)
             elif direction == "down":
                 self.image = image
             elif direction == "left":
                 self.image = pygame.transform.rotate(image, 270.)
-                self.rect = Rect(self.position.x - self.frame_height, self.position.y - self.frame_width / 2, self.position.x, self.position.y + self.frame_width / 2)
+                self.rect = Rect(self.position.x - self.frame_height, self.position.y - self.frame_width / 2, self.frame_height, self.frame_width)
             elif direction == "right":
                 self.image = pygame.transform.rotate(image, 90.)
-                self.rect = Rect(self.position.x, self.position.y - self.frame_width / 2, self.position.x + self.frame_height, self.position.y + self.frame_width / 2)
+                self.rect = Rect(self.position.x, self.position.y - self.frame_width / 2, self.frame_height, self.frame_width)
             self.old_frame = self.frame
 
 
@@ -128,6 +126,7 @@ class FireBullet(SpecialBullet):
     def __init__(self, screen):
         SpecialBullet.__init__(self, screen)
         self.image_name = "source_material/bullet/fire.png"
+        self.hurt_num = 4
 
 
 # 冰弹类
@@ -135,6 +134,7 @@ class IceBullet(SpecialBullet):
     def __init__(self, screen):
         SpecialBullet.__init__(self, screen)
         self.image_name = "source_material/bullet/ice.png"
+        self.hurt_num = 2
 
 
 # 电弹类
@@ -142,3 +142,4 @@ class ElectricityBullet(SpecialBullet):
     def __init__(self, screen):
         SpecialBullet.__init__(self, screen)
         self.image_name = "source_material/bullet/electricity.png"
+        self.hurt_num = 3

@@ -17,7 +17,7 @@ class Prop(tank_sprite.TankSprite):
         pass
 
     # 道具自动消失（存在时限到）
-    def loss(self, current_time):
+    def is_loss(self, current_time):
         if current_time - self.birth_time >= self.keep_time:
             return True
         else:
@@ -43,10 +43,10 @@ class AttackProp(Prop):
         Prop.__init__(self, screen)
         self.keep_time = 25000
 
-    def produce(self, pos_x, pos_y, current_time):
+    def produce(self, pos, current_time):
         self.load(self.image_name, 32, 32, 3)
-        self.position = Vector2(pos_x, pos_y)
-        self.rect = Rect(pos_x - self.frame_width / 2, pos_y - self.frame_height / 2, pos_x + self.frame_width / 2, pos_y + self.frame_height / 2)
+        self.position = pos
+        self.rect = Rect(pos.x - self.frame_width / 2, pos.y - self.frame_height / 2, self.frame_width, self.frame_height)
         self.birth_time = current_time
 
 
@@ -56,10 +56,10 @@ class OtherProp(Prop):
         Prop.__init__(self, screen)
         self.keep_time = 20000
 
-    def produce(self, pos_x, pos_y, current_time):
+    def produce(self, pos, current_time):
         self.load(self.image_name, 32, 32, 4)
-        self.position = Vector2(pos_x, pos_y)
-        self.rect = Rect(pos_x - self.frame_width / 2, pos_y - self.frame_height / 2, pos_x + self.frame_width / 2, pos_y + self.frame_height / 2)
+        self.position = pos
+        self.rect = Rect(pos.x - self.frame_width / 2, pos.y - self.frame_height / 2, self.frame_width, self.frame_height)
         self.birth_time = current_time
 
 

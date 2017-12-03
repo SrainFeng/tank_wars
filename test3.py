@@ -1,6 +1,7 @@
 import prop_classes
 import pygame
 from pygame.locals import *
+from gameobjects.vector2 import Vector2
 
 pygame.init()
 screen = pygame.display.set_mode((800, 458), 0, 32)
@@ -22,12 +23,12 @@ while True:
     pressed_mouse = pygame.mouse.get_pressed()
     if pressed_mouse[0]:
         mouse_pos = pygame.mouse.get_pos()
-        prop = prop_classes.CoinProp(screen)
-        prop.produce(mouse_pos[0], mouse_pos[1], current_time)
+        prop = prop_classes.IceProp(screen)
+        prop.produce(Vector2(mouse_pos[0], mouse_pos[1]), current_time)
         prop_group.add(prop)
 
     for p in prop_group.sprites():
-        if p.loss(current_time):
+        if p.is_loss(current_time):
             prop_group.remove(p)
 
     screen.blit(background, (0, 0))

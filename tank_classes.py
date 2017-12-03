@@ -35,7 +35,7 @@ class Tank(tank_sprite.TankSprite):
 # AI坦克类
 class AITank(Tank):
     def __init__(self, screen):
-        Tank.__init__(self,screen)
+        Tank.__init__(self, screen)
         # 添加状态机
         self.brain = state_machine.StateMachine()
         # 为状态机添加状态
