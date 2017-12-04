@@ -6,11 +6,16 @@ import state_machine
 class Tank(tank_sprite.TankSprite):
     def __init__(self, screen):
         tank_sprite.TankSprite.__init__(self, screen)
-        self.Hp = 0
-        # 方向 up, down, left, right
+        self.HP = 0
+        # 方向 int 值，对应 pygame 中键盘的上下左右键的值
         self.direction = None
+        # 子弹发射的速度
         self.hit_speed = 0
+        # 战车移动的速度
         self.move_speed = 0
+
+    # 产生一辆坦克
+    def birth(self):
 
     # 开火
     def fire(self):
@@ -21,15 +26,28 @@ class Tank(tank_sprite.TankSprite):
         pass
 
     # 受到伤害
-    def hurted(self, num):
+    def hurt(self, num):
         self.Hp -= num
-
-    def update(self):
-        pass
 
     # 活动过程
     def process(self, time_passed):
         pass
+
+
+class PlayerTank(Tank):
+    def __init__(self, screen):
+        Tank.__init__(self, screen)
+        self.HP = 10
+        self.hit_speed = 10
+        self.move_speed = 100
+        self.last_hit_time = 0
+        self.image_name = ""
+
+    def birth(self, pos, direction):
+        self.load()
+
+
+
 
 
 # AI坦克类

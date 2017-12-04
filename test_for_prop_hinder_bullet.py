@@ -47,7 +47,7 @@ while True:
     if pressed_mouse[0]:
         mouse_pos = pygame.mouse.get_pos()
         bullet = bullet_classes.OrdinaryBullet(screen)
-        bullet.fired(Vector2(mouse_pos[0], mouse_pos[1]))
+        bullet.fired(Vector2(mouse_pos[0], mouse_pos[1]), K_LEFT)
         bullets.add(bullet)
 
     for box in boxes.sprites():
@@ -66,7 +66,7 @@ while True:
     for b in bullets.sprites():
         if b.is_loss():
             b.kill()
-    bullets.update(current_time, time_passed_second, "left")
+    bullets.update(current_time, time_passed_second)
 
     for p in props.sprites():
         if p.is_loss(current_time):

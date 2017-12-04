@@ -8,9 +8,9 @@ OrdinaryBullet = "source_material/bullet/Ordinary.png"
 class Bullet(tank_sprite.TankSprite):
     def __init__(self, screen):
         tank_sprite.TankSprite.__init__(self, screen)
+        # 子弹的方向
+        self.direction = 0
         self.hurt_num = 0
-        self.fly_speed = 0
-        self.fly_time = 0
 
     # 产生一颗子弹
     def fired(self):
@@ -32,11 +32,12 @@ class OrdinaryBullet(Bullet):
         self.birth_pos = None
 
     # 参数为子弹产生的位置
-    def fired(self, pos):
+    def fired(self, pos, direction):
         self.load(self.image_name, 12, 12, 1)
         self.position = Vector2(pos.x, pos.y)
         self.rect = Rect(pos.x - self.frame_width / 2, pos.y - self.frame_height / 2, self.frame_width, self.frame_height)
         self.birth_pos = Vector2(pos.x, pos.y)
+        self.direction = direction
 
     def is_loss(self):
         if (self.position - self.birth_pos).get_length() >= self.fly_distance:
@@ -45,14 +46,14 @@ class OrdinaryBullet(Bullet):
             return False
 
     # 根据 direction 参数确定发射方向
-    def update(self, current_time, time_passed, direction, rate=60):
-        if direction == "up":
+    def update(self, current_time, time_passed, rate=60):
+        if self.direction == K_UP:
             dire = Vector2(0, -1)
-        elif direction == "down":
+        elif self.direction == K_DOWN:
             dire = Vector2(0, 1)
-        elif direction == "left":
+        elif self.direction == K_LEFT:
             dire = Vector2(-1, 0)
-        elif direction == "right":
+        elif self.direction == K_RIGHT:
             dire = Vector2(1, 0)
         self.rect = self.rect.move(self.fly_speed * time_passed * dire.x, self.fly_speed * time_passed * dire.y)
         self.position.x = (self.rect.left + self.rect.right) / 2
@@ -68,13 +69,13 @@ class OrdinaryBullet(Bullet):
             frame_y = (self.frame // self.columns) * self.frame_height
             rect = Rect((frame_x, frame_y, self.frame_width,self.frame_height))
             image = self.master_image.subsurface(rect)
-            if direction == "up":
+            if self.direction == K_UP:
                 self.image = pygame.transform.rotate(image, 270.)
-            elif direction == "down":
+            elif self.direction == K_DOWN:
                 self.image = pygame.transform.rotate(image, 90.)
-            elif direction == "left":
+            elif self.direction == K_LEFT:
                 self.image = image
-            elif direction == "right":
+            elif self.direction == K_RIGHT:
                 self.image = pygame.transform.rotate(image, 180.)
             self.old_frame = self.frame
 
@@ -84,10 +85,11 @@ class SpecialBullet(Bullet):
     def __init__(self, screen):
         Bullet.__init__(self, screen)
 
-    def fired(self, pos):
+    def fired(self, pos, direction):
         self.load(self.image_name, 24, 96, 4)
         self.position = Vector2(pos.x, pos.y)
         self.rect = Rect(pos.x - self.frame_width / 2, pos.y, self.frame_width, self.frame_height)
+        self.direction = direction
 
     def is_loss(self):
         if self.old_frame == self.last_frame:
@@ -95,7 +97,7 @@ class SpecialBullet(Bullet):
         else:
             return False
 
-    def update(self, current_time, direction, rate=120):
+    def update(self, current_time, rate=120):
         if current_time > self.last_time + rate:
             self.frame += 1
             if self.frame > self.last_frame:
@@ -107,15 +109,15 @@ class SpecialBullet(Bullet):
             frame_y = (self.frame // self.columns) * self.frame_height
             rect = Rect((frame_x, frame_y, self.frame_width, self.frame_height))
             image = self.master_image.subsurface(rect)
-            if direction == "up":
+            if self.direction == K_UP:
                 self.image = pygame.transform.rotate(image, 180.)
                 self.rect = Rect(self.position.x - self.frame_width / 2, self.position.y - self.frame_height, self.frame_width, self.frame_height)
-            elif direction == "down":
+            elif self.direction == K_DOWN:
                 self.image = image
-            elif direction == "left":
+            elif self.direction == K_LEFT:
                 self.image = pygame.transform.rotate(image, 270.)
                 self.rect = Rect(self.position.x - self.frame_height, self.position.y - self.frame_width / 2, self.frame_height, self.frame_width)
-            elif direction == "right":
+            elif self.direction == K_RIGHT:
                 self.image = pygame.transform.rotate(image, 90.)
                 self.rect = Rect(self.position.x, self.position.y - self.frame_width / 2, self.frame_height, self.frame_width)
             self.old_frame = self.frame
