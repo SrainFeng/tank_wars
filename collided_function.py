@@ -16,10 +16,9 @@ rect1 = Rect(282, 208, 64, 64)
 rect2 = Rect(529, 231, 12, 12)
 
 
-class Sprite:
+class MySprite:
     def __init__(self, rect):
         self.rect = rect
 
-sprite_a = Sprite(rect1)
-sprite_b = Sprite(rect2)
-print(collided_function(sprite_a, sprite_a))
+sprite_a = MySprite(rect1)
+sprite_b = MySprite(rect2)

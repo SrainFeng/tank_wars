@@ -1,5 +1,6 @@
 import tank_sprite
 import state_machine
+import pygame
 from pygame.locals import *
 from gameobjects.vector2 import Vector2
 import bullet_classes
@@ -17,14 +18,33 @@ class Tank(tank_sprite.TankSprite):
         self.hit_speed = 0
         # 战车移动的速度
         self.move_speed = 0
+        # 用于控制射击速度
+        self.last_hit_time = 0
+        self.last_pos = None
+        self.last_rect = None
 
     # 产生一辆坦克
     def birth(self):
         pass
 
-    # 开火
-    def fire(self):
-        pass
+# 发射一颗普通子弹
+    def fire(self, current_time):
+        if current_time >= self.last_hit_time + self.hit_speed:
+            pos = Vector2(0, 0)
+            if self.direction == K_UP:
+                pos = Vector2(self.position.x, self.position.y - self.frame_height / 2)
+            elif self.direction == K_DOWN:
+                pos = Vector2(self.position.x, self.position.y + self.frame_height / 2)
+            elif self.direction == K_LEFT:
+                pos = Vector2(self.position.x - self.frame_width / 2, self.position.y - 10)
+            elif self.direction == K_RIGHT:
+                pos = Vector2(self.position.x + self.frame_width / 2, self.position.y - 10)
+            bullet = bullet_classes.OrdinaryBullet(self.target_surface)
+            bullet.fired(pos, self.direction)
+            self.last_hit_time = current_time
+            return bullet
+        else:
+            return None
 
     # 是否死亡
     def is_dead(self):
@@ -49,15 +69,23 @@ class Tank(tank_sprite.TankSprite):
             return
         self.direction = new_direction
 
+    # 撞墙，停止移动
+    def stop(self):
+        self.rect = self.last_rect
+        self.position = self.last_pos
 
+    def get_distance(self, tank):
+        distance = self.position.get_distance_to(tank.position)
+        return distance
+
+
+# 玩家坦克类
 class PlayerTank(Tank):
     def __init__(self, screen):
         Tank.__init__(self, screen)
         self.HP = 10
         self.hit_speed = 500
         self.move_speed = 100
-        # 用于控制射击速度
-        self.last_hit_time = 0
         self.image_name = "source_material/tanks/player.png"
         self.birth_time = 0
         # 无敌的持续时间（毫秒）
@@ -68,8 +96,6 @@ class PlayerTank(Tank):
         self.electricity = 0
         # 初始为第6帧
         self.frame = 6
-        self.last_pos = None
-        self.last_rect = None
 
     def birth(self, pos, current_time):
         self.load(self.image_name, 32, 32, 2)
@@ -77,26 +103,6 @@ class PlayerTank(Tank):
         self.rect = Rect(pos.x - self.frame_width / 2, pos.y - self.frame_height / 2, self.frame_width, self.frame_height)
         self.direction = K_UP
         self.birth_time = current_time
-
-    # 发射一颗普通子弹
-    def fire(self, current_time):
-        if current_time >= self.last_hit_time + self.hit_speed:
-            pos = Vector2(0, 0)
-            if self.direction == K_UP:
-                pos = Vector2(self.position.x, self.position.y - self.frame_height / 2)
-            elif self.direction == K_DOWN:
-                pos = Vector2(self.position.x, self.position.y + self.frame_height / 2)
-            elif self.direction == K_LEFT:
-                pos = Vector2(self.position.x - self.frame_width / 2, self.position.y - 10)
-            elif self.direction == K_RIGHT:
-                pos = Vector2(self.position.x + self.frame_width / 2, self.position.y - 10)
-            bullet = bullet_classes.OrdinaryBullet(self.target_surface)
-            print("发射")
-            bullet.fired(pos, self.direction)
-            self.last_hit_time = current_time
-            return bullet
-        else:
-            return None
 
     # 发射一个特殊子弹
     def fire_a_ice(self, current_time):
@@ -153,17 +159,12 @@ class PlayerTank(Tank):
         else:
             return None
 
-    # 撞墙，停止移动
-    def stop(self):
-        self.rect = self.last_rect
-        self.position = self.last_pos
-
     # 因为有无敌效果，重写 hurt 方法
     def hurt(self, num, current_time):
         if current_time - self.birth_time >= self.unrivalled_time:
             self.HP -= num
 
-    def update(self, current_time, time_passed, move_direction, rate=60):
+    def update(self, current_time, time_passed, move_direction, rate=120):
         self.last_pos = self.position
         self.last_rect = self.rect
         if self.direction == K_DOWN:
@@ -184,10 +185,12 @@ class PlayerTank(Tank):
             self.frame = 4
 
         if current_time - self.birth_time <= self.unrivalled_time:
-            if self.frame % 2 == 0:
-                self.frame += 1
-            else:
-                self.frame -= 1
+            if current_time > (self.last_time + rate):
+                if self.frame % 2 == 0:
+                    self.frame += 1
+                else:
+                    self.frame -= 1
+                self.last_time = current_time
 
         frame_x = (self.frame % self.columns) * self.frame_width
         frame_y = (self.frame // self.columns) * self.frame_height
@@ -204,18 +207,112 @@ class AITank(Tank):
         # 为状态机添加状态
         exploring = state_machine.StateExploring(self)
         hitting = state_machine.StateHitting(self)
+        turning = state_machine.StateTurning(self)
         self.brain.add_state(exploring)
         self.brain.add_state(hitting)
+        self.brain.add_state(turning)
         # 当前属性：paralysis, frozen
-        self.State = None
+        self.state = None
+        self.view = 200
+        # 记录敌人（一个精灵组）
+        self.enemies = None
+        # 记录是否撞墙
+        self.is_strike = False
+        # 目标敌机
+        self.target = None
+        # 子弹精灵
+        self.bullet = None
 
     # 产生一个坦克，随机选择出生地
-    def birth(self):
-        pass
+    def birth(self, pos, group):
+        self.load(self.image_name, 32, 32, 3)
+        self.position = pos
+        self.rect = Rect(pos.x - self.frame_width / 2, pos.y - self.frame_height / 2, self.frame_width, self.frame_height)
+        self.direction = K_UP
+        self.brain.set_state("exploring")
+        self.enemies = group
 
     # 获得状态
     def get_state(self):
         pass
 
-    def get_rid_of_stata(self):
+    def get_rid_of_state(self):
+        pass
+
+    def strike(self):
+        self.is_strike = True
+
+    def ai_fire(self):
+        return self.bullet
+
+    def update(self, current_time, time_passed, rate=60):
+        self.last_pos = self.position
+        self.last_rect = self.rect
+        self.bullet = self.brain.think(current_time)
+        if self.direction == K_DOWN:
+            self.rect = self.rect.move(0, self.move_speed * time_passed)
+            self.position.y = (self.rect.top + self.rect.bottom) / 2
+            self.frame = 0
+        elif self.direction == K_UP:
+            self.rect = self.rect.move(0, -self.move_speed * time_passed)
+            self.position.y = (self.rect.top + self.rect.bottom) / 2
+            self.frame = 9
+        elif self.direction == K_LEFT:
+            self.rect = self.rect.move(-self.move_speed * time_passed, 0)
+            self.position.x = (self.rect.left + self.rect.right) / 2
+            self.frame = 3
+        elif self.direction == K_RIGHT:
+            self.rect = self.rect.move(self.move_speed * time_passed, 0)
+            self.position.x = (self.rect.left + self.rect.right) / 2
+            self.frame = 6
+
+        if self.state == "paralysis":
+            self.frame += 2
+        elif self.state == "frozen":
+            self.frame += 1
+        frame_x = (self.frame % self.columns) * self.frame_width
+        frame_y = (self.frame // self.columns) * self.frame_height
+        rect = Rect((frame_x, frame_y, self.frame_width, self.frame_height))
+        self.image = self.master_image.subsurface(rect)
+
+
+# 普通的坦克
+class OrdinaryTank(AITank):
+    def __init__(self, screen):
+        AITank.__init__(self, screen)
+        self.HP = 6
+        self.move_speed = 80
+        self.hit_speed = 1000
+        self.image_name = "source_material/tanks/ordinary_car.png"
+
+
+# 速度型的坦克
+class SpeedTank(AITank):
+    def __init__(self, screen):
+        AITank.__init__(self, screen)
+        self.HP = 4
+        self.move_speed = 100
+        self.hit_speed = 1000
+        self.image_name = "source_material/tanks/speed_car.png"
+
+
+# 重型坦克
+class ArmouredTank(AITank):
+    def __init__(self, screen):
+        AITank.__init__(self, screen)
+        self.HP = 10
+        self.move_speed = 50
+        self.hit_speed = 500
+        self.image_name = "source_material/tanks/armoured_car.png"
+
+
+# 道具车
+class PropCar(AITank):
+    def __init__(self, screen):
+        AITank.__init__(self, screen)
+        self.HP = 4
+        self.move_speed = 100
+        self.image_name = "source_material/tanks/prop_car.png"
+
+    def ai_fire(self):
         pass

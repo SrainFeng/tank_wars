@@ -2,7 +2,6 @@ import tank_sprite
 import pygame
 from pygame.locals import *
 from gameobjects.vector2 import Vector2
-OrdinaryBullet = "source_material/bullet/Ordinary.png"
 
 
 class Bullet(tank_sprite.TankSprite):
@@ -69,19 +68,14 @@ class OrdinaryBullet(Bullet):
             frame_y = (self.frame // self.columns) * self.frame_height
             rect = Rect((frame_x, frame_y, self.frame_width, self.frame_height))
             image = self.master_image.subsurface(rect)
-            print(K_UP)
             if self.direction == K_UP:
                 self.image = pygame.transform.rotate(image, 270.)
-                print(111)
             elif self.direction == K_DOWN:
                 self.image = pygame.transform.rotate(image, 90.)
-                print(111)
             elif self.direction == K_LEFT:
                 self.image = image
-                print(111)
             elif self.direction == K_RIGHT:
                 self.image = pygame.transform.rotate(image, 180.)
-                print(111)
             self.old_frame = self.frame
 
 
