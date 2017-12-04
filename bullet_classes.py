@@ -45,8 +45,8 @@ class OrdinaryBullet(Bullet):
         else:
             return False
 
-    # 根据 direction 参数确定发射方向
     def update(self, current_time, time_passed, rate=60):
+        dire = Vector2(0, 0)
         if self.direction == K_UP:
             dire = Vector2(0, -1)
         elif self.direction == K_DOWN:
@@ -67,16 +67,21 @@ class OrdinaryBullet(Bullet):
         if self.frame != self.old_frame:
             frame_x = (self.frame % self.columns) * self.frame_width
             frame_y = (self.frame // self.columns) * self.frame_height
-            rect = Rect((frame_x, frame_y, self.frame_width,self.frame_height))
+            rect = Rect((frame_x, frame_y, self.frame_width, self.frame_height))
             image = self.master_image.subsurface(rect)
+            print(K_UP)
             if self.direction == K_UP:
                 self.image = pygame.transform.rotate(image, 270.)
+                print(111)
             elif self.direction == K_DOWN:
                 self.image = pygame.transform.rotate(image, 90.)
+                print(111)
             elif self.direction == K_LEFT:
                 self.image = image
+                print(111)
             elif self.direction == K_RIGHT:
                 self.image = pygame.transform.rotate(image, 180.)
+                print(111)
             self.old_frame = self.frame
 
 

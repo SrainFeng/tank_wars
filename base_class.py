@@ -21,3 +21,4 @@ class Base(hinder_classes.DestroyableHinder):
         explode.fired(self.position)
         return explode
 
+

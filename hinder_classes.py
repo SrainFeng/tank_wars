@@ -37,6 +37,10 @@ class DestroyableHinder(Hinder):
     def open(self):
         pass
 
+    # 受到伤害
+    def hurt(self, num):
+        self.HP -= num
+
 
 # 武器补给箱
 class AmmunitionSupplyBox(DestroyableHinder):

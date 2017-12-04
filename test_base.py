@@ -39,19 +39,18 @@ while True:
     if pressed_mouse[0]:
         mouse_pos = pygame.mouse.get_pos()
         bullet = bullet_classes.OrdinaryBullet(screen)
-        bullet.fired(Vector2(mouse_pos[0], mouse_pos[1]))
+        bullet.fired(Vector2(mouse_pos[0], mouse_pos[1]), K_DOWN)
         bullets.add(bullet)
 
     for base in bases.sprites():
         List = pygame.sprite.spritecollide(base, bullets, True)
         for r in List:
             if r:
-                base.HP -= 2
+                base.hurt(r.hurt_num)
 
     for b in bases.sprites():
         if b.is_destroyed():
             e = b.explode()
-            print(e)
             explodes.add(e)
             b.kill()
     bases.update()
@@ -65,7 +64,10 @@ while True:
     for b in bullets.sprites():
         if b.is_loss():
             b.kill()
-    bullets.update(current_time, time_passed_second, "down")
+    bullets.update(current_time, time_passed_second)
+
+    for i in bullets.sprites():
+        print(i.image)
 
     screen.blit(background, (0, 0))
 
