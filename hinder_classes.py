@@ -21,7 +21,7 @@ class DestroyableHinder(Hinder):
         self.HP = 4
 
     def put(self, pos):
-        self.load(self.image_name, 64, 64, 1)
+        self.load(self.image_name, 32, 32, 1)
         self.position = pos
         self.rect = Rect(pos.x - self.frame_width / 2, pos.y - self.frame_height / 2, self.frame_width, self.frame_height)
         self.image = self.master_image
@@ -87,18 +87,18 @@ class MedicineSupplyBox(DestroyableHinder):
             prop.produce(self.position, current_time)
         return prop
 
-
+'''
 # 不可破坏的障碍物
 class DisDestroyableHinder(Hinder):
     def __init__(self, screen):
         Hinder.__init__(screen)
 
 
-# 松树
+# 石柱
 class PineTree(DisDestroyableHinder):
     def __init__(self, screen):
         DisDestroyableHinder.__init__(self, screen)
-        self.image_name = "source_material/hinder/tree1.png"
+        self.image_name = "source_material/hinder/stone.png"
 
     def put(self, pos):
         self.load(self.image_name, 64, 110, 1)
@@ -111,7 +111,7 @@ class PineTree(DisDestroyableHinder):
 class Bush(DisDestroyableHinder):
     def __init__(self, screen):
         DisDestroyableHinder.__init__(self, screen)
-        self.image_name = "source_material/hinder/tree2.png"
+        self.image_name = "source_material/hinder/bush.png"
 
     def put(self, pos):
         self.load(self.image_name, 64, 64, 1)
@@ -131,3 +131,4 @@ class Pit(DisDestroyableHinder):
         self.position = pos
         self.rect = Rect(pos.x - self.frame_width / 2, pos.y - self.frame_height / 2, pos.x + self.frame_width / 2, pos.y + self.frame_height / 2)
         self.image = self.master_image
+'''

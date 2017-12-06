@@ -37,7 +37,7 @@ AI_tank.add(tank2)
 # 道具箱
 boxes = pygame.sprite.Group()
 
-for i in range(5):
+for i in range(10):
     c = randint(1, 2)
     if c == 1:
         A = hinder_classes.AmmunitionSupplyBox(screen)
@@ -115,6 +115,7 @@ while True:
     # 盒子与玩家
     ListB = pygame.sprite.spritecollide(tank1, boxes, False)
     if ListB:
+        print(111)
         tank1.stop()
 
     # 盒子与AI
