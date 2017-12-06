@@ -20,5 +20,3 @@ class Base(hinder_classes.DestroyableHinder):
         explode = explode_class.Explode(self.target_surface)
         explode.fired(self.position)
         return explode
-
-

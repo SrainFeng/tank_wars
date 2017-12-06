@@ -1,10 +1,11 @@
 import tank_sprite
 import state_machine
-import pygame
 from pygame.locals import *
 from gameobjects.vector2 import Vector2
 import bullet_classes
 import explode_class
+from random import randint
+import prop_classes
 
 
 # 抽象坦克类
@@ -96,13 +97,18 @@ class PlayerTank(Tank):
         self.electricity = 0
         # 初始为第6帧
         self.frame = 6
+        # 在地图上的位置
+        self.map_pos = None
+        # 地图大小
+        self.map_size = (640, 640)
 
-    def birth(self, pos, current_time):
+    def birth(self, pos, current_time, map_pos=Vector2(0, 0)):
         self.load(self.image_name, 32, 32, 2)
         self.position = pos
         self.rect = Rect(pos.x - self.frame_width / 2, pos.y - self.frame_height / 2, self.frame_width, self.frame_height)
         self.direction = K_UP
         self.birth_time = current_time
+        self.map_pos = map_pos
 
     # 发射一个特殊子弹
     def fire_a_ice(self, current_time):
@@ -167,21 +173,23 @@ class PlayerTank(Tank):
     def update(self, current_time, time_passed, move_direction, rate=120):
         self.last_pos = self.position
         self.last_rect = self.rect
+        move_distance = Vector2(self.move_speed * time_passed * move_direction.x, self.move_speed * time_passed * move_direction.y)
+        if (self.map_pos.x <= self.target_surface.get_width() / 2) or (self.map_pos.x >= (self.map_size[0] - self.target_surface.get_width() / 2)):
+            self.position.x += move_distance.x
+        if (self.map_pos.y <= self.target_surface.get_height() / 2) or (self.map_pos.y >= (self.map_size[1] - self.target_surface.get_height() / 2)):
+            self.position.y += move_distance.y
+        self.map_pos.x += move_distance.x
+        self.map_pos.y += move_distance.y
+
+        self.rect = Rect(self.position.x - self.frame_width / 2, self.position.y - self.frame_height / 2, self.frame_width, self.frame_height)
+
         if self.direction == K_DOWN:
-            self.rect = self.rect.move(0, self.move_speed * time_passed * move_direction.y)
-            self.position.y = (self.rect.top + self.rect.bottom) / 2
             self.frame = 0
         elif self.direction == K_UP:
-            self.rect = self.rect.move(0, self.move_speed * time_passed * move_direction.y)
-            self.position.y = (self.rect.top + self.rect.bottom) / 2
             self.frame = 6
         elif self.direction == K_LEFT:
-            self.rect = self.rect.move(self.move_speed * time_passed * move_direction.x, 0)
-            self.position.x = (self.rect.left + self.rect.right) / 2
             self.frame = 2
         elif self.direction == K_RIGHT:
-            self.rect = self.rect.move(self.move_speed * time_passed * move_direction.x, 0)
-            self.position.x = (self.rect.left + self.rect.right) / 2
             self.frame = 4
 
         if current_time - self.birth_time <= self.unrivalled_time:
@@ -316,3 +324,34 @@ class PropCar(AITank):
 
     def ai_fire(self):
         pass
+
+    def open(self, current_time):
+        c = randint(1, 9)
+        if c == 1:
+            prop = prop_classes.FireProp(self.target_surface)
+            prop.produce(self.position, current_time)
+        elif c == 2:
+            prop = prop_classes.IceProp(self.target_surface)
+            prop.produce(self.position, current_time)
+        elif c == 3:
+            prop = prop_classes.ElectricityProp(self.target_surface)
+            prop.produce(self.position, current_time)
+        elif c == 4:
+            prop = prop_classes.HitSpeedProp(self.target_surface)
+            prop.produce(self.position, current_time)
+        elif c == 5:
+            prop = prop_classes.HPProp(self.target_surface)
+            prop.produce(self.position, current_time)
+        elif c == 6:
+            prop = prop_classes.BaseHPProp(self.target_surface)
+            prop.produce(self.position, current_time)
+        elif c == 7:
+            prop = prop_classes.LifeProp(self.target_surface)
+            prop.produce(self.position, current_time)
+        elif c == 8:
+            prop = prop_classes.MoveSpeedProp(self.target_surface)
+            prop.produce(self.position, current_time)
+        elif c == 9:
+            prop = prop_classes.CoinProp(self.target_surface)
+            prop.produce(self.position, current_time)
+        return prop

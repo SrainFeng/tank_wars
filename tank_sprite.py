@@ -28,7 +28,7 @@ class TankSprite(pygame.sprite.Sprite):
         self.columns = 1
         # 记录精灵的位置的矩形和向量
         self.rect = None
-        self.position = Vector2(0, 0)
+        self.position = None
 
         # 要求使用参数初始化一些类的属性
     def load(self, image_name, width, height, column):

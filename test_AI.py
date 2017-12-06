@@ -30,7 +30,7 @@ player_tank.add(tank1)
 
 # AI坦克
 AI_tank = pygame.sprite.Group()
-tank2 = tank_classes.PropCar(screen)
+tank2 = tank_classes.OrdinaryTank(screen)
 tank2.birth(Vector2(400, 200), player_tank)
 AI_tank.add(tank2)
 
@@ -141,8 +141,10 @@ while True:
 
     # AI死亡检测
     if tank2.is_dead():
+        #pr = tank2.open(current_time)
         tank2.kill()
-        tank2 = tank_classes.PropCar(screen)
+        #props.add(pr)
+        tank2 = tank_classes.OrdinaryTank (screen)
         tank2.birth(Vector2(700, 400), player_tank)
         AI_tank.add(tank2)
 
