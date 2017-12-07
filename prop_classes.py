@@ -10,7 +10,8 @@ class Prop(tank_sprite.TankSprite):
         self.keep_time = 0
         self.birth_time = 0
         # 记录位置，为二维向量
-        self.position = None
+        self.map_pos = None
+        self.map_rect = None
 
     # 产生一个道具，参数为生成的坐标
     def produce(self):
@@ -23,7 +24,9 @@ class Prop(tank_sprite.TankSprite):
         else:
             return False
 
-    def update(self, current_time, rate=90):
+    def update(self, current_time, screen_pos, rate=90):
+        self.position = self.map_pos - screen_pos
+        self.rect = Rect(self.position.x - self.frame_width / 2, self.position.y - self.frame_height / 2, self.frame_width, self.frame_height)
         if current_time - self.last_time >= rate:
             self.frame += 1
             if self.frame == self.last_frame:
@@ -43,11 +46,19 @@ class AttackProp(Prop):
         Prop.__init__(self, screen)
         self.keep_time = 25000
 
-    def produce(self, pos, current_time):
+    def produce(self, pos, current_time, screen_pos):
+        """
+        :param pos: 滚动地图中，该对象相对于地图坐标系的位置
+        :param current_time: 当前时间
+        :param screen_pos: 目前显示屏幕的左上角相对于地图坐标系的位置
+        :return: void
+        """
         self.load(self.image_name, 32, 32, 3)
-        self.position = pos
-        self.rect = Rect(pos.x - self.frame_width / 2, pos.y - self.frame_height / 2, self.frame_width, self.frame_height)
+        self.map_pos = pos
+        self.map_rect = Rect(pos.x - self.frame_width / 2, pos.y - self.frame_height / 2, self.frame_width, self.frame_height)
         self.birth_time = current_time
+        self.position = self.map_pos - screen_pos
+        self.rect = Rect(self.position.x - self.frame_width / 2, self.position.y - self.frame_height / 2, self.frame_width, self.frame_height)
 
 
 # 各种其他道具的父类（坦克回复、生命和移速；基地回复；金币）
@@ -56,11 +67,13 @@ class OtherProp(Prop):
         Prop.__init__(self, screen)
         self.keep_time = 20000
 
-    def produce(self, pos, current_time):
+    def produce(self, pos, current_time, screen_pos):
         self.load(self.image_name, 32, 32, 4)
-        self.position = pos
+        self.map_pos = pos
         self.rect = Rect(pos.x - self.frame_width / 2, pos.y - self.frame_height / 2, self.frame_width, self.frame_height)
         self.birth_time = current_time
+        self.position = self.map_pos - screen_pos
+        self.rect = Rect(self.position.x - self.frame_width / 2, self.position.y - self.frame_height / 2, self.frame_width, self.frame_height)
 
 
 # 电弹道具

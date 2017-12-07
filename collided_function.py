@@ -6,14 +6,14 @@ def collided_function(sprite1, sprite2):
         return False
     elif (sprite1.rect.left <= sprite2.rect.left) and (sprite1.rect.right <= sprite2.rect.left):
         return False
-    elif (sprite1.rect.top >= sprite2.rect.top) and (sprite1.rect.top <= sprite2.rect.bottom):
+    elif (sprite1.rect.top >= sprite2.rect.top) and (sprite1.rect.top >= sprite2.rect.bottom):
         return False
     elif (sprite1.rect.top <= sprite2.rect.top) and (sprite1.rect.bottom <= sprite2.rect.top):
         return False
     return True
 
-rect1 = Rect(282, 208, 64, 64)
-rect2 = Rect(529, 231, 12, 12)
+rect1 = Rect(341, 264, 24, 96)
+rect2 = Rect(384, 367, 32, 32)
 
 
 class MySprite:
@@ -22,3 +22,6 @@ class MySprite:
 
 sprite_a = MySprite(rect1)
 sprite_b = MySprite(rect2)
+
+print(collided_function(sprite_a, sprite_b))
+#print(sprite_a.rect.left >= sprite_b.rect.right)

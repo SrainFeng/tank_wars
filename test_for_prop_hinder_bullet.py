@@ -78,9 +78,9 @@ while True:
             if r:
                 box.HP -= 2
 
-    ListB = pygame.sprite.spritecollide(tank, boxes, False)
-    if ListB:
-        tank.stop()
+    for box in boxes.sprites():
+        if box.rect.colliderect(tank.rect):
+            tank.stop()
 
     player_tank.update(current_time, time_passed_second, move)
 
@@ -95,9 +95,6 @@ while True:
         if b.is_loss():
             b.kill()
     bullets.update(current_time, time_passed_second)
-
-    for i in bullets.sprites():
-        print(i.image)
 
     for p in props.sprites():
         if p.is_loss(current_time):

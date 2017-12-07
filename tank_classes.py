@@ -23,13 +23,18 @@ class Tank(tank_sprite.TankSprite):
         self.last_hit_time = 0
         self.last_pos = None
         self.last_rect = None
+        # 在地图上的位置
+        self.map_pos = None
+        self.map_rect = None
+        self.last_map_pos = None
+        self.last_map_rect = None
 
     # 产生一辆坦克
     def birth(self):
         pass
 
-# 发射一颗普通子弹
-    def fire(self, current_time):
+    # 发射一颗普通子弹
+    def fire(self, current_time, screen_pos):
         if current_time >= self.last_hit_time + self.hit_speed:
             pos = Vector2(0, 0)
             if self.direction == K_UP:
@@ -37,11 +42,11 @@ class Tank(tank_sprite.TankSprite):
             elif self.direction == K_DOWN:
                 pos = Vector2(self.position.x, self.position.y + self.frame_height / 2)
             elif self.direction == K_LEFT:
-                pos = Vector2(self.position.x - self.frame_width / 2, self.position.y - 10)
+                pos = Vector2(self.position.x - self.frame_width / 2, self.position.y - 8)
             elif self.direction == K_RIGHT:
-                pos = Vector2(self.position.x + self.frame_width / 2, self.position.y - 10)
+                pos = Vector2(self.position.x + self.frame_width / 2, self.position.y - 8)
             bullet = bullet_classes.OrdinaryBullet(self.target_surface)
-            bullet.fired(pos, self.direction)
+            bullet.fired(pos, self.direction, screen_pos)
             self.last_hit_time = current_time
             return bullet
         else:
@@ -72,8 +77,10 @@ class Tank(tank_sprite.TankSprite):
 
     # 撞墙，停止移动
     def stop(self):
-        self.rect = self.last_rect
-        self.position = self.last_pos
+        self.rect = self.last_rect.copy()
+        self.position = self.last_pos.copy()
+        self.map_pos = self.last_map_pos.copy()
+        self.map_rect = self.last_map_rect.copy()
 
     def get_distance(self, tank):
         distance = self.position.get_distance_to(tank.position)
@@ -86,20 +93,18 @@ class PlayerTank(Tank):
         Tank.__init__(self, screen)
         self.HP = 10
         self.hit_speed = 500
+        self.special_hit_speed = 1000
         self.move_speed = 100
         self.image_name = "source_material/tanks/player.png"
         self.birth_time = 0
         # 无敌的持续时间（毫秒）
         self.unrivalled_time = 5000
         # 记录剩余特殊子弹的个数
-        self.ice_num = 0
-        self.fire_num = 0
-        self.electricity = 0
+        self.ice_num = 100
+        self.fire_num = 100
+        self.electricity_num = 100
         # 初始为第6帧
         self.frame = 6
-        # 在地图上的位置
-        self.map_pos = None
-        self.map_rect = None
         # 地图大小
         self.map_size = (640, 640)
 
@@ -116,57 +121,57 @@ class PlayerTank(Tank):
         self.direction = K_UP
         self.birth_time = current_time
         self.map_pos = map_pos
-        self.rect = Rect(map_pos.x - self.frame_width / 2, map_pos.y - self.frame_height / 2, self.frame_width, self.frame_height)
+        self.map_rect = Rect(map_pos.x - self.frame_width / 2, map_pos.y - self.frame_height / 2, self.frame_width, self.frame_height)
 
     # 发射一个特殊子弹
-    def fire_a_ice(self, current_time):
-        if (current_time >= self.last_hit_time + self.hit_speed) and (self.ice_num > 0):
+    def fire_a_ice(self, current_time, screen_pos):
+        if (current_time >= self.last_hit_time + self.special_hit_speed) and (self.ice_num > 0):
             if self.direction == K_UP:
-                pos = Vector2(self.position.x, self.position.y - self.frame_height / 2)
+                pos = Vector2(self.position.x, self.position.y - self.frame_height / 2 - 48)
             elif self.direction == K_DOWN:
-                pos = Vector2(self.position.x, self.position.y + self.frame_height / 2)
+                pos = Vector2(self.position.x, self.position.y + self.frame_height / 2 + 48)
             elif self.direction == K_LEFT:
-                pos = Vector2(self.position.x - self.frame_width / 2, self.position.y)
+                pos = Vector2(self.position.x - self.frame_width / 2 - 48, self.position.y - 8)
             elif self.direction == K_RIGHT:
-                pos = Vector2(self.position.x + self.frame_width / 2, self.position.y)
+                pos = Vector2(self.position.x + self.frame_width / 2 + 48, self.position.y - 8)
             ice = bullet_classes.IceBullet(self.target_surface)
-            ice.fired(pos, self.direction)
+            ice.fired(pos, self.direction, screen_pos)
             self.last_hit_time = current_time
             self.ice_num -= 1
             return ice
         else:
             return None
 
-    def fire_a_fire(self, current_time):
-        if (current_time >= self.last_hit_time + self.hit_speed) and (self.fire_num > 0):
+    def fire_a_fire(self, current_time, screen_pos):
+        if (current_time >= self.last_hit_time + self.special_hit_speed) and (self.fire_num > 0):
             if self.direction == K_UP:
-                pos = Vector2(self.position.x, self.position.y - self.frame_height / 2)
+                pos = Vector2(self.position.x, self.position.y - self.frame_height / 2 - 48)
             elif self.direction == K_DOWN:
-                pos = Vector2(self.position.x, self.position.y + self.frame_height / 2)
+                pos = Vector2(self.position.x, self.position.y + self.frame_height / 2 + 48)
             elif self.direction == K_LEFT:
-                pos = Vector2(self.position.x - self.frame_width / 2, self.position.y)
+                pos = Vector2(self.position.x - self.frame_width / 2 - 48, self.position.y - 8)
             elif self.direction == K_RIGHT:
-                pos = Vector2(self.position.x + self.frame_width / 2, self.position.y)
+                pos = Vector2(self.position.x + self.frame_width / 2 + 48, self.position.y - 8)
             fire = bullet_classes.FireBullet(self.target_surface)
-            fire.fired(pos, self.direction)
+            fire.fired(pos, self.direction, screen_pos)
             self.last_hit_time = current_time
             self.fire_num -= 1
             return fire
         else:
             return None
 
-    def fire_a_electricity(self, current_time):
-        if (current_time >= self.last_hit_time + self.hit_speed) and (self.fire_num > 0):
+    def fire_a_electricity(self, current_time, screen_pos):
+        if (current_time >= self.last_hit_time + self.special_hit_speed) and (self.electricity_num > 0):
             if self.direction == K_UP:
-                pos = Vector2(self.position.x, self.position.y - self.frame_height / 2)
+                pos = Vector2(self.position.x, self.position.y - self.frame_height / 2 - 48)
             elif self.direction == K_DOWN:
-                pos = Vector2(self.position.x, self.position.y + self.frame_height / 2)
+                pos = Vector2(self.position.x, self.position.y + self.frame_height / 2 + 48)
             elif self.direction == K_LEFT:
-                pos = Vector2(self.position.x - self.frame_width / 2, self.position.y)
+                pos = Vector2(self.position.x - self.frame_width / 2 - 48, self.position.y - 8)
             elif self.direction == K_RIGHT:
-                pos = Vector2(self.position.x + self.frame_width / 2, self.position.y)
+                pos = Vector2(self.position.x + self.frame_width / 2 + 48, self.position.y - 8)
             electricity = bullet_classes.ElectricityBullet(self.target_surface)
-            electricity.fired(pos, self.direction)
+            electricity.fired(pos, self.direction, screen_pos)
             self.last_hit_time = current_time
             self.fire_num -= 1
             return electricity
@@ -178,7 +183,7 @@ class PlayerTank(Tank):
         if current_time - self.birth_time >= self.unrivalled_time:
             self.HP -= num
 
-    def update(self, current_time, time_passed, move_direction, rate=120):
+    def update(self, current_time, time_passed, move_direction, screen_pos, rate=120):
         """
         :param current_time: 当前时间（毫秒）
         :param time_passed: 距离上一次 update 的时间（秒）
@@ -186,18 +191,20 @@ class PlayerTank(Tank):
         :param rate: 变帧的时长（毫秒）
         :return: void
         """
-        self.last_pos = self.position
-        self.last_rect = self.rect
+        self.last_map_rect = self.map_rect.copy()
+        self.last_map_pos = self.map_pos.copy()
+        self.last_pos = self.position.copy()
+        self.last_rect = self.rect.copy()
         move_distance = Vector2(self.move_speed * time_passed * move_direction.x, self.move_speed * time_passed * move_direction.y)
-        if (self.map_pos.x <= self.target_surface.get_width() / 2) or (self.map_pos.x >= (self.map_size[0] - self.target_surface.get_width() / 2)):
-            self.position.x += move_distance.x
-        if (self.map_pos.y <= self.target_surface.get_height() / 2) or (self.map_pos.y >= (self.map_size[1] - self.target_surface.get_height() / 2)):
-            self.position.y += move_distance.y
-        self.map_pos.x += move_distance.x
-        self.map_pos.y += move_distance.y
-
+        self.map_rect = self.map_rect.move(move_distance.x, move_distance.y)
+        self.map_pos.x = (self.map_rect.left + self.map_rect.right) / 2
+        self.map_pos.y = (self.map_rect.top + self.map_rect.bottom) / 2
+        if (self.map_pos.x < self.target_surface.get_width() / 2) or (self.map_pos.x > (self.map_size[0] - self.target_surface.get_width() / 2)) or (self.map_pos.y < self.target_surface.get_height() / 2) or (self.map_pos.y > (self.map_size[1] - self.target_surface.get_height() / 2)):
+            self.position = self.map_pos - screen_pos
+        else:
+            self.position.x = self.target_surface.get_width() / 2
+            self.position.y = self.target_surface.get_height() / 2
         self.rect = Rect(self.position.x - self.frame_width / 2, self.position.y - self.frame_height / 2, self.frame_width, self.frame_height)
-        self.map_rect = Rect(self.map_pos.x - self.frame_width / 2, self.map_pos.y - self.frame_height / 2, self.frame_width, self.frame_height)
 
         if self.direction == K_DOWN:
             self.frame = 0
@@ -237,6 +244,8 @@ class AITank(Tank):
         self.brain.add_state(turning)
         # 当前属性：paralysis, frozen
         self.state = None
+        self.get_state_time = 0
+        self.state_keep_time = 5000
         self.view = 200
         # 记录敌人（一个精灵组）
         self.enemies = None
@@ -248,20 +257,27 @@ class AITank(Tank):
         self.bullet = None
 
     # 产生一个坦克，随机选择出生地
-    def birth(self, pos, group):
+    def birth(self, pos, group, screen_pos):
         self.load(self.image_name, 32, 32, 3)
-        self.position = pos
-        self.rect = Rect(pos.x - self.frame_width / 2, pos.y - self.frame_height / 2, self.frame_width, self.frame_height)
+        self.map_pos = pos
+        self.map_rect = Rect(pos.x - self.frame_width / 2, pos.y - self.frame_height / 2, self.frame_width, self.frame_height)
         self.direction = K_UP
         self.brain.set_state("exploring")
         self.enemies = group
+        self.position = self.map_pos - screen_pos
+        self.rect = Rect(self.position.x - self.frame_width / 2, self.position.y - self.frame_height / 2, self.frame_width, self.frame_height)
 
     # 获得状态
-    def get_state(self):
-        pass
+    def get_state(self, attribute, current_time):
+        if attribute == "ice":
+            self.state = "frozen"
+        if attribute == "electricity":
+            self.state = "paralysis"
+        self.get_state_time = current_time
 
-    def get_rid_of_state(self):
-        pass
+    def get_rid_of_state(self, current_time):
+        if current_time >= self.get_state_time + self.state_keep_time:
+            self.state = None
 
     def strike(self):
         self.is_strike = True
@@ -269,31 +285,69 @@ class AITank(Tank):
     def ai_fire(self):
         return self.bullet
 
-    def update(self, current_time, time_passed, rate=60):
-        self.last_pos = self.position
-        self.last_rect = self.rect
-        self.bullet = self.brain.think(current_time)
-        if self.direction == K_DOWN:
-            self.rect = self.rect.move(0, self.move_speed * time_passed)
-            self.position.y = (self.rect.top + self.rect.bottom) / 2
-            self.frame = 0
-        elif self.direction == K_UP:
-            self.rect = self.rect.move(0, -self.move_speed * time_passed)
-            self.position.y = (self.rect.top + self.rect.bottom) / 2
-            self.frame = 9
-        elif self.direction == K_LEFT:
-            self.rect = self.rect.move(-self.move_speed * time_passed, 0)
-            self.position.x = (self.rect.left + self.rect.right) / 2
-            self.frame = 3
-        elif self.direction == K_RIGHT:
-            self.rect = self.rect.move(self.move_speed * time_passed, 0)
-            self.position.x = (self.rect.left + self.rect.right) / 2
-            self.frame = 6
+    # AI发射一颗子弹
+    def fire(self, current_time, screen_pos):
+        if current_time >= self.last_hit_time + self.hit_speed:
+            pos = Vector2(0, 0)
+            if self.direction == K_UP:
+                pos = Vector2(self.map_pos.x, self.map_pos.y - self.frame_height / 2)
+            elif self.direction == K_DOWN:
+                pos = Vector2(self.map_pos.x, self.map_pos.y + self.frame_height / 2)
+            elif self.direction == K_LEFT:
+                pos = Vector2(self.map_pos.x - self.frame_width / 2, self.map_pos.y - 8)
+            elif self.direction == K_RIGHT:
+                pos = Vector2(self.map_pos.x + self.frame_width / 2, self.map_pos.y - 8)
+            bullet = bullet_classes.AIBullet(self.target_surface)
+            bullet.fired(pos, self.direction, screen_pos)
+            self.last_hit_time = current_time
+            return bullet
+        else:
+            return None
+
+    def update(self, current_time, time_passed, screen_pos, rate=60):
+        self.last_map_rect = self.map_rect.copy()
+        self.last_map_pos = self.map_pos.copy()
+        self.last_pos = self.position.copy()
+        self.last_rect = self.rect.copy()
+        if (self.state != "frozen") and (self.state != "paralysis"):
+            self.bullet = self.brain.think(current_time, screen_pos)
+            if self.direction == K_DOWN:
+                self.map_rect = self.map_rect.move(0, self.move_speed * time_passed)
+                self.map_pos.y = (self.map_rect.top + self.map_rect.bottom) / 2
+                self.frame = 0
+            elif self.direction == K_UP:
+                self.map_rect = self.map_rect.move(0, -self.move_speed * time_passed)
+                self.map_pos.y = (self.map_rect.top + self.map_rect.bottom) / 2
+                self.frame = 9
+            elif self.direction == K_LEFT:
+                self.map_rect = self.map_rect.move(-self.move_speed * time_passed, 0)
+                self.map_pos.x = (self.map_rect.left + self.map_rect.right) / 2
+                self.frame = 3
+            elif self.direction == K_RIGHT:
+                self.map_rect = self.map_rect.move(self.move_speed * time_passed, 0)
+                self.map_pos.x = (self.map_rect.left + self.map_rect.right) / 2
+                self.frame = 6
+        self.position = self.map_pos - screen_pos
+        self.rect = Rect(self.position.x - self.frame_width / 2, self.position.y - self.frame_height / 2, self.frame_width, self.frame_height)
 
         if self.state == "paralysis":
-            self.frame += 2
+            if self.direction == K_DOWN:
+                self.frame = 2
+            elif self.direction == K_UP:
+                self.frame = 11
+            elif self.direction == K_LEFT:
+                self.frame = 5
+            elif self.direction == K_RIGHT:
+                self.frame = 8
         elif self.state == "frozen":
-            self.frame += 1
+            if self.direction == K_DOWN:
+                self.frame = 1
+            elif self.direction == K_UP:
+                self.frame = 10
+            elif self.direction == K_LEFT:
+                self.frame = 4
+            elif self.direction == K_RIGHT:
+                self.frame = 7
         frame_x = (self.frame % self.columns) * self.frame_width
         frame_y = (self.frame // self.columns) * self.frame_height
         rect = Rect((frame_x, frame_y, self.frame_width, self.frame_height))

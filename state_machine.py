@@ -12,10 +12,10 @@ class StateMachine:
 
         self.states[state.name] = state
 
-    def think(self, current_time):
+    def think(self, current_time, screen_pos):
         if self.active_state is None:
             return
-        bullet = self.active_state.do_actions(current_time)
+        bullet = self.active_state.do_actions(current_time, screen_pos)
         new_state_name = self.active_state.check_conditions()
         if new_state_name is not None:
             self.set_state(new_state_name)
@@ -64,7 +64,7 @@ class StateExploring(State):
         elif c == 3:
             self.tank.direction = K_RIGHT
 
-    def do_actions(self, current_time):
+    def do_actions(self, current_time, screen_pos):
         if randint(1, 150) == 1:
             self.random_direction()
 
@@ -88,8 +88,8 @@ class StateHitting(State):
         State.__init__(self, "hitting")
         self.tank = tank
 
-    def do_actions(self, current_time):
-        bullet = self.tank.fire(current_time)
+    def do_actions(self, current_time, screen_pos):
+        bullet = self.tank.fire(current_time, screen_pos)
         return bullet
 
     def check_conditions(self):
@@ -109,7 +109,7 @@ class StateTurning(State):
         State.__init__(self, "turning")
         self.tank = tank
 
-    def do_actions(self, current_time):
+    def do_actions(self, current_time, screen_pos):
         self.tank.direction += 1
         if self.tank.direction > 276:
             self.tank.direction -= 4

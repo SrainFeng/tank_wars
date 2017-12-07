@@ -1,5 +1,6 @@
 from pytmx.util_pygame import load_pygame
 from pygame.locals import Rect
+from gameobjects.vector2 import Vector2
 
 
 # 固定地图算法实现
@@ -86,6 +87,8 @@ def read_map_roll(map_name, map_surface, layers_nums, pos, screen_size):
                 pygame_surface = tiled_map.get_tile_image(x, y, layer)
                 if pygame_surface:
                     map_surface.blit(pygame_surface, (screen_x, screen_y))
+
+    return Vector2(player_pos.x - screen_size[0] / 2, player_pos.y - screen_size[1] / 2)
 
 
 # 绘制滚动地图中的某一层
