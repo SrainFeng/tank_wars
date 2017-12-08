@@ -61,22 +61,22 @@ def read_map_roll(map_name, map_surface, layers_nums, pos, screen_size):
         player_pos.y = tiled_map.height * tiled_map.tileheight - screen_size[1] / 2
     tile_player_x = int(player_pos.x // tiled_map.tilewidth)
     tile_player_y = int(player_pos.y // tiled_map.tileheight)
-    begin_x = tile_player_x - 5
-    begin_y = tile_player_y - 5
+    begin_x = tile_player_x - 14
+    begin_y = tile_player_y - 14
     if begin_x < 0:
         begin_x = 0
 
-    if begin_x > 10:
-        begin_x = 10
+    if begin_x > 22:
+        begin_x = 22
 
     if begin_y < 0:
         begin_y = 0
 
-    if begin_y > 10:
-        begin_y = 10
+    if begin_y > 22:
+        begin_y = 22
 
-    end_x = begin_x + 10
-    end_y = begin_y + 10
+    end_x = begin_x + 28
+    end_y = begin_y + 28
 
     for layer in range(layers_nums):
         for y in range(begin_y, end_y):
@@ -141,7 +141,7 @@ def draw_a_layer_in_roll(map_name, map_surface, layer_num, pos, screen_size):
 
 
 # 从制定的对象层取出所有对象的矩形框
-def get_object(map_name, object_layer_name):
+def get_objects(map_name, object_layer_name):
     """
     :param map_name: tmx 的路径名称
     :param object_layer_name: 对象层的名称
@@ -153,3 +153,22 @@ def get_object(map_name, object_layer_name):
     for a_object in object_layer:
         objects.append(Rect(a_object.x, a_object.y, a_object.width, a_object.height))
     return objects
+
+
+# 取出将对象并转换成地图坐标(针对玩家与基地)
+def get_objects_position_for_base(map_name, object_layer_name):
+    tiled_map = load_pygame(map_name)
+    object_layer = tiled_map.get_layer_by_name(object_layer_name)
+    positions = {}
+    for a_object in object_layer:
+        positions[a_object.name] = Vector2(a_object.x + a_object.width / 2, a_object.y + a_object.height / 2)
+    return positions
+
+
+def get_objects_position(map_name, object_layer_name):
+    tiled_map = load_pygame(map_name)
+    object_layer = tiled_map.get_layer_by_name(object_layer_name)
+    positions = []
+    for a_object in object_layer:
+        positions.append(Vector2(a_object.x + a_object.width / 2, a_object.y + a_object.height / 2))
+    return positions

@@ -60,9 +60,9 @@ class Tank(tank_sprite.TankSprite):
             return False
 
     # 死亡后产生一次爆炸
-    def explode(self):
+    def explode(self, screen_pos):
         explode = explode_class.Explode(self.target_surface)
-        explode.fired(self.position)
+        explode.fired(self.map_pos, screen_pos)
         return explode
 
     # 受到伤害
@@ -83,7 +83,7 @@ class Tank(tank_sprite.TankSprite):
         self.map_rect = self.last_map_rect.copy()
 
     def get_distance(self, tank):
-        distance = self.position.get_distance_to(tank.position)
+        distance = self.map_pos.get_distance_to(tank.map_pos)
         return distance
 
 
@@ -106,7 +106,7 @@ class PlayerTank(Tank):
         # 初始为第6帧
         self.frame = 6
         # 地图大小
-        self.map_size = (640, 640)
+        self.map_size = (1600, 1600)
 
     def birth(self, pos, current_time, map_pos=Vector2(0, 0)):
         """

@@ -65,7 +65,7 @@ class StateExploring(State):
             self.tank.direction = K_RIGHT
 
     def do_actions(self, current_time, screen_pos):
-        if randint(1, 150) == 1:
+        if randint(1, 50) == 1:
             self.random_direction()
 
     def check_conditions(self):

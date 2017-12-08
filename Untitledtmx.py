@@ -6,35 +6,32 @@ from gameobjects.vector2 import Vector2
 from random import randint
 import hinder_classes
 
-screen_top = Rect(0, -1, 640, 1)
-screen_bottom = Rect(0, 640, 640, 1)
-screen_left = Rect(-1, 0, 1, 640)
-screen_right = Rect(640, 0, 1, 640)
-screen_borders = [screen_bottom, screen_left, screen_right, screen_top]
+map_top = Rect(0, -1, 1600, 1)
+map_bottom = Rect(0, 1600, 1600, 1)
+map_left = Rect(-1, 0, 1, 1600)
+map_right = Rect(1600, 0, 1, 1600)
+map_borders = [map_bottom, map_left, map_right, map_top]
 
 pygame.init()
 
-screen = pygame.display.set_mode((224, 224), 0, 32)
+screen = pygame.display.set_mode((800, 800), 0, 32)
 
-map_surface = pygame.Surface((256, 256), 0, 32)
+map_surface = pygame.Surface((832, 832), 0, 32)
 
 clock = pygame.time.Clock()
-
-# 获取地图中的某一层的对象，返回对象矩形列表
-objects = read_map.get_object("map/tmxtry.tmx", "object")
 
 # 创建一些精灵组
 # 玩家坦克
 current_time = pygame.time.get_ticks()
 player_tank = pygame.sprite.Group()
 tank1 = tank_classes.PlayerTank(screen)
-tank1.birth(Vector2(112, 112), current_time, Vector2(320, 320))
+tank1.birth(Vector2(400, 400), current_time, Vector2(1200, 1200))
 player_tank.add(tank1)
 
 # AI坦克
 AI_tank = pygame.sprite.Group()
 tank2 = tank_classes.OrdinaryTank(screen)
-tank2.birth(Vector2(400, 200), player_tank, Vector2(208, 208))
+tank2.birth(Vector2(400, 200), player_tank, Vector2(1088, 1088))
 AI_tank.add(tank2)
 
 # 道具箱
@@ -52,12 +49,16 @@ props = pygame.sprite.Group()
 # 特殊子弹
 special_bullets = pygame.sprite.Group()
 
+# 爆炸
+explode = pygame.sprite.Group()
+
 
 while True:
+    print(tank2.map_pos)
     time_passed = clock.tick(160)
     time_passed_second = time_passed / 1000.
     current_time = pygame.time.get_ticks()
-    screen_pos = read_map.read_map_roll("map/tmxtry.tmx", map_surface, 2, tank1.map_pos, (224, 224))
+    screen_pos = read_map.read_map_roll("map/map1.tmx", map_surface, 3, tank1.map_pos, (800, 800))
 
     for event in pygame.event.get():
         if event.type == QUIT:
@@ -66,31 +67,31 @@ while True:
     pressed_keys = pygame.key.get_pressed()
 
     move = Vector2(0, 0)
-    if pressed_keys[K_UP]:
+    if pressed_keys[K_w]:
         move.y -= 1
         tank1.change_direction(K_UP)
-    elif pressed_keys[K_LEFT]:
+    elif pressed_keys[K_a]:
         move.x -= 1
         tank1.change_direction(K_LEFT)
-    elif pressed_keys[K_DOWN]:
+    elif pressed_keys[K_s]:
         move.y += 1
         tank1.change_direction(K_DOWN)
-    elif pressed_keys[K_RIGHT]:
+    elif pressed_keys[K_d]:
         move.x += 1
         tank1.change_direction(K_RIGHT)
     if pressed_keys[K_SPACE]:
         bullet = tank1.fire(current_time, screen_pos)
         if bullet:
             bullets.add(bullet)
-    elif pressed_keys[K_z]:
+    elif pressed_keys[K_b]:
         s_bullet = tank1.fire_a_fire(current_time, screen_pos)
         if s_bullet:
             special_bullets.add(s_bullet)
-    elif pressed_keys[K_x]:
+    elif pressed_keys[K_n]:
         s_bullet = tank1.fire_a_electricity(current_time, screen_pos)
         if s_bullet:
             special_bullets.add(s_bullet)
-    elif pressed_keys[K_c]:
+    elif pressed_keys[K_m]:
         s_bullet = tank1.fire_a_ice(current_time, screen_pos)
         if s_bullet:
             special_bullets.add(s_bullet)
@@ -129,7 +130,6 @@ while True:
     # 特殊子弹与AI碰撞
     for sb in special_bullets.sprites():
         for AI in AI_tank.sprites():
-            print(sb.map_rect, AI.map_rect)
             if sb.map_rect.colliderect(AI.map_rect) and sb.is_new():
                 AI.hurt(sb.hurt_num)
                 sb.using()
@@ -149,7 +149,7 @@ while True:
         ai_bullets.add(ab)
 
     # AI与边界碰撞
-    if tank2.map_rect.collidelist(screen_borders) != -1:
+    if tank2.map_rect.collidelist(map_borders) != -1:
         tank2.stop()
         tank2.strike()
 
@@ -195,14 +195,24 @@ while True:
         break
 
     # AI死亡检测
-    if tank2.is_dead():
-        #pr = tank2.open(current_time)
-        tank2.kill()
-        #props.add(pr)
-        tank2 = tank_classes.OrdinaryTank(screen)
-        tank2.birth(Vector2(400, 200), player_tank, Vector2(208, 208))
-        AI_tank.add(tank2)
+    for AI in AI_tank:
+        if AI.is_dead():
+            e = AI.explode(screen_pos)
+            if e:
+                explode.add(e)
+            #pr = tank2.open(current_time)
+            AI.kill()
+            #props.add(pr)
+            tank2 = tank_classes.OrdinaryTank(screen)
+            tank2.birth(Vector2(400, 200), player_tank, Vector2(208, 208))
+            AI_tank.add(tank2)
     AI_tank.update(current_time, time_passed_second, screen_pos)
+
+    # 爆炸死亡检测
+    for e in explode.sprites():
+        if e.is_loss():
+            e.kill()
+    explode.update(current_time, screen_pos)
 
     # 屏幕绘制
     screen.blit(map_surface, (0, 0))
@@ -213,16 +223,17 @@ while True:
     ai_bullets.draw(screen)
     AI_tank.draw(screen)
     special_bullets.draw(screen)
+    explode.draw(screen)
 
     c = randint(0, 100)
     if c == 1:
         A = hinder_classes.AmmunitionSupplyBox(map_surface)
-        V1 = Vector2(randint(0, 640), randint(0, 640))
+        V1 = Vector2(randint(0, 1600), randint(0, 1600))
         A.put(V1, screen_pos)
         boxes.add(A)
     if c == 2:
         M = hinder_classes.MedicineSupplyBox(screen)
-        V2 = Vector2(randint(0, 640), randint(0, 640))
+        V2 = Vector2(randint(0, 1600), randint(0, 1600))
         M.put(V2, screen_pos)
         boxes.add(M)
 
