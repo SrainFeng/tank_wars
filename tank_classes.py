@@ -100,13 +100,19 @@ class PlayerTank(Tank):
         # 无敌的持续时间（毫秒）
         self.unrivalled_time = 5000
         # 记录剩余特殊子弹的个数
-        self.ice_num = 100
-        self.fire_num = 100
-        self.electricity_num = 100
+        self.ice_num = 10
+        self.fire_num = 10
+        self.electricity_num = 10
         # 初始为第6帧
         self.frame = 6
         # 地图大小
         self.map_size = (1600, 1600)
+        # 记录获得状态的时间，以控制加速状态时长
+        self.get_hit_speed_time = 0
+        self.get_move_speed_time = 0
+        # 记录是否获得了道具加成
+        self.is_hit = False
+        self.is_move = False
 
     def birth(self, pos, current_time, map_pos=Vector2(0, 0)):
         """
@@ -173,7 +179,7 @@ class PlayerTank(Tank):
             electricity = bullet_classes.ElectricityBullet(self.target_surface)
             electricity.fired(pos, self.direction, screen_pos)
             self.last_hit_time = current_time
-            self.fire_num -= 1
+            self.electricity_num -= 1
             return electricity
         else:
             return None
@@ -182,6 +188,29 @@ class PlayerTank(Tank):
     def hurt(self, num, current_time):
         if current_time - self.birth_time >= self.unrivalled_time:
             self.HP -= num
+
+    def hp_up(self, num):
+        self.HP += num
+        if self.HP > 10:
+            self.HP = 10
+
+    def get_speed_up(self, prop_name, current_time):
+        if prop_name == "hit_speed":
+            self.get_hit_speed_time = current_time
+            self.hit_speed = 200
+            self.is_hit = True
+        elif prop_name == "move_speed":
+            self.get_move_speed_time = current_time
+            self.move_speed = 200
+            self.is_move = True
+
+    def prop_time_out(self, current_time):
+        if self.is_hit and current_time >= self.get_hit_speed_time + 10000:
+            self.hit_speed = 500
+            self.is_hit = False
+        if self.is_move and current_time >= self.get_move_speed_time + 10000:
+            self.move_speed = 100
+            self.is_move = False
 
     def update(self, current_time, time_passed, move_direction, screen_pos, rate=120):
         """
@@ -395,33 +424,34 @@ class PropCar(AITank):
     def ai_fire(self):
         pass
 
-    def open(self, current_time):
+    def open(self, current_time, screen_pos):
         c = randint(1, 9)
         if c == 1:
             prop = prop_classes.FireProp(self.target_surface)
-            prop.produce(self.position, current_time)
+            prop.produce(self.map_pos, current_time, screen_pos)
         elif c == 2:
             prop = prop_classes.IceProp(self.target_surface)
-            prop.produce(self.position, current_time)
+            prop.produce(self.map_pos, current_time, screen_pos)
         elif c == 3:
             prop = prop_classes.ElectricityProp(self.target_surface)
-            prop.produce(self.position, current_time)
+            prop.produce(self.map_pos, current_time, screen_pos)
         elif c == 4:
             prop = prop_classes.HitSpeedProp(self.target_surface)
-            prop.produce(self.position, current_time)
+            prop.produce(self.map_pos, current_time, screen_pos)
         elif c == 5:
             prop = prop_classes.HPProp(self.target_surface)
-            prop.produce(self.position, current_time)
+            prop.produce(self.map_pos, current_time, screen_pos)
         elif c == 6:
             prop = prop_classes.BaseHPProp(self.target_surface)
-            prop.produce(self.position, current_time)
+            prop.produce(self.map_pos, current_time, screen_pos)
         elif c == 7:
             prop = prop_classes.LifeProp(self.target_surface)
-            prop.produce(self.position, current_time)
+            prop.produce(self.map_pos, current_time, screen_pos)
         elif c == 8:
             prop = prop_classes.MoveSpeedProp(self.target_surface)
-            prop.produce(self.position, current_time)
+            prop.produce(self.map_pos, current_time, screen_pos)
         elif c == 9:
             prop = prop_classes.CoinProp(self.target_surface)
-            prop.produce(self.position, current_time)
+            prop.produce(self.map_pos, current_time, screen_pos)
+
         return prop

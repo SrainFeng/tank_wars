@@ -20,6 +20,14 @@ class Base(hinder_classes.Box):
         self.position = self.map_pos - screen_pos
         self.rect = Rect(self.position.x - self.frame_width / 2, self.position.y - self.frame_height / 2, self.frame_width, self.frame_height)
 
+    def hurt(self, num):
+        self.HP -= num
+
+    def hp_up(self, num):
+        self.HP += num
+        if self.HP > 40:
+            self.HP = 40
+
     def explode(self):
         explode = explode_class.Explode(self.target_surface)
         explode.fired(self.map_pos, self.screen_pos)

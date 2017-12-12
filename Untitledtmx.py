@@ -14,9 +14,9 @@ map_borders = [map_bottom, map_left, map_right, map_top]
 
 pygame.init()
 
-screen = pygame.display.set_mode((800, 800), 0, 32)
+screen = pygame.display.set_mode((800, 480), 0, 32)
 
-map_surface = pygame.Surface((832, 832), 0, 32)
+map_surface = pygame.Surface((832, 512), 0, 32)
 
 clock = pygame.time.Clock()
 
@@ -25,13 +25,13 @@ clock = pygame.time.Clock()
 current_time = pygame.time.get_ticks()
 player_tank = pygame.sprite.Group()
 tank1 = tank_classes.PlayerTank(screen)
-tank1.birth(Vector2(400, 400), current_time, Vector2(1200, 1200))
+tank1.birth(Vector2(400, 240), current_time, Vector2(1200, 1200))
 player_tank.add(tank1)
 
 # AI坦克
 AI_tank = pygame.sprite.Group()
-tank2 = tank_classes.OrdinaryTank(screen)
-tank2.birth(Vector2(400, 200), player_tank, Vector2(1088, 1088))
+tank2 = tank_classes.PropCar(screen)
+tank2.birth(Vector2(400, 200), player_tank, Vector2(800, 960))
 AI_tank.add(tank2)
 
 # 道具箱
@@ -54,11 +54,11 @@ explode = pygame.sprite.Group()
 
 
 while True:
-    print(tank2.map_pos)
-    time_passed = clock.tick(160)
+    time_passed = clock.tick(60)
     time_passed_second = time_passed / 1000.
     current_time = pygame.time.get_ticks()
-    screen_pos = read_map.read_map_roll("map/map1.tmx", map_surface, 3, tank1.map_pos, (800, 800))
+    screen_pos = read_map.read_map_roll("map/map1.tmx", map_surface, 3, tank1.map_pos, (800, 480))
+    print(tank2.map_pos)
 
     for event in pygame.event.get():
         if event.type == QUIT:
@@ -184,12 +184,6 @@ while True:
             props.add(p)
     boxes.update(screen_pos)
 
-    # 道具死亡检测
-    for p in props.sprites():
-        if p.is_loss(current_time):
-            p.kill()
-    props.update(current_time, screen_pos)
-
     # 玩家死亡检测
     if tank1.is_dead():
         break
@@ -200,13 +194,20 @@ while True:
             e = AI.explode(screen_pos)
             if e:
                 explode.add(e)
-            #pr = tank2.open(current_time)
+            pr = tank2.open(current_time, screen_pos)
+            print(pr)
             AI.kill()
-            #props.add(pr)
-            tank2 = tank_classes.OrdinaryTank(screen)
-            tank2.birth(Vector2(400, 200), player_tank, Vector2(208, 208))
+            props.add(pr)
+            tank2 = tank_classes.PropCar(screen)
+            tank2.birth(Vector2(400, 200), player_tank, screen_pos)
             AI_tank.add(tank2)
     AI_tank.update(current_time, time_passed_second, screen_pos)
+
+    # 道具死亡检测
+    for p in props.sprites():
+        if p.is_loss(current_time):
+            p.kill()
+    props.update(current_time, screen_pos)
 
     # 爆炸死亡检测
     for e in explode.sprites():
@@ -227,7 +228,7 @@ while True:
 
     c = randint(0, 100)
     if c == 1:
-        A = hinder_classes.AmmunitionSupplyBox(map_surface)
+        A = hinder_classes.AmmunitionSupplyBox(screen)
         V1 = Vector2(randint(0, 1600), randint(0, 1600))
         A.put(V1, screen_pos)
         boxes.add(A)
@@ -238,5 +239,3 @@ while True:
         boxes.add(M)
 
     pygame.display.update()
-
-

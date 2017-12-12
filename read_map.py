@@ -62,7 +62,7 @@ def read_map_roll(map_name, map_surface, layers_nums, pos, screen_size):
     tile_player_x = int(player_pos.x // tiled_map.tilewidth)
     tile_player_y = int(player_pos.y // tiled_map.tileheight)
     begin_x = tile_player_x - 14
-    begin_y = tile_player_y - 14
+    begin_y = tile_player_y - 9
     if begin_x < 0:
         begin_x = 0
 
@@ -72,16 +72,15 @@ def read_map_roll(map_name, map_surface, layers_nums, pos, screen_size):
     if begin_y < 0:
         begin_y = 0
 
-    if begin_y > 22:
-        begin_y = 22
+    if begin_y > 32:
+        begin_y = 32
 
     end_x = begin_x + 28
-    end_y = begin_y + 28
+    end_y = begin_y + 18
 
     for layer in range(layers_nums):
         for y in range(begin_y, end_y):
             for x in range(begin_x, end_x):
-
                 screen_x = x * tiled_map.tilewidth - player_pos.x + screen_size[0] / 2
                 screen_y = y * tiled_map.tileheight - player_pos.y + screen_size[1] / 2
                 pygame_surface = tiled_map.get_tile_image(x, y, layer)
@@ -113,29 +112,28 @@ def draw_a_layer_in_roll(map_name, map_surface, layer_num, pos, screen_size):
         player_pos.y = tiled_map.height * tiled_map.tileheight - screen_size[1] / 2
     tile_player_x = int(player_pos.x // tiled_map.tilewidth)
     tile_player_y = int(player_pos.y // tiled_map.tileheight)
-    begin_x = tile_player_x - 5
-    begin_y = tile_player_y - 5
+    begin_x = tile_player_x - 14
+    begin_y = tile_player_y - 9
     if begin_x < 0:
         begin_x = 0
 
-    if begin_x > 10:
-        begin_x = 10
+    if begin_x > 22:
+        begin_x = 22
 
     if begin_y < 0:
         begin_y = 0
 
-    if begin_y > 10:
-        begin_y = 10
+    if begin_y > 32:
+        begin_y = 32
 
-    end_x = begin_x + 10
-    end_y = begin_y + 10
+    end_x = begin_x + 28
+    end_y = begin_y + 18
 
     for y in range(begin_y, end_y):
         for x in range(begin_x, end_x):
-
             screen_x = x * tiled_map.tilewidth - player_pos.x + screen_size[0] / 2
             screen_y = y * tiled_map.tileheight - player_pos.y + screen_size[1] / 2
-            pygame_surface = tiled_map.get_tile_image(x, y, layer_num)
+            pygame_surface = tiled_map.get_tile_image(x, y, layer_num - 1)
             if pygame_surface:
                 map_surface.blit(pygame_surface, (screen_x, screen_y))
 
@@ -171,4 +169,5 @@ def get_objects_position(map_name, object_layer_name):
     positions = []
     for a_object in object_layer:
         positions.append(Vector2(a_object.x + a_object.width / 2, a_object.y + a_object.height / 2))
+    print(positions)
     return positions

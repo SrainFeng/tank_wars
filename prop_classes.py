@@ -12,6 +12,7 @@ class Prop(tank_sprite.TankSprite):
         # 记录位置，为二维向量
         self.map_pos = None
         self.map_rect = None
+        self.prop_name = None
 
     # 产生一个道具，参数为生成的坐标
     def produce(self):
@@ -70,7 +71,7 @@ class OtherProp(Prop):
     def produce(self, pos, current_time, screen_pos):
         self.load(self.image_name, 32, 32, 4)
         self.map_pos = pos
-        self.rect = Rect(pos.x - self.frame_width / 2, pos.y - self.frame_height / 2, self.frame_width, self.frame_height)
+        self.map_rect = Rect(pos.x - self.frame_width / 2, pos.y - self.frame_height / 2, self.frame_width, self.frame_height)
         self.birth_time = current_time
         self.position = self.map_pos - screen_pos
         self.rect = Rect(self.position.x - self.frame_width / 2, self.position.y - self.frame_height / 2, self.frame_width, self.frame_height)
@@ -81,6 +82,7 @@ class ElectricityProp(AttackProp):
     def __init__(self, screen):
         AttackProp.__init__(self, screen)
         self.image_name = "source_material/prop/electricity.png"
+        self.prop_name = "electricity"
 
 
 # 火焰弹道具
@@ -88,6 +90,7 @@ class FireProp(AttackProp):
     def __init__(self, screen):
         AttackProp.__init__(self, screen)
         self.image_name = "source_material/prop/fire.png"
+        self.prop_name = "fire"
 
 
 # 冰弹道具
@@ -95,6 +98,7 @@ class IceProp(AttackProp):
     def __init__(self, screen):
         AttackProp.__init__(self, screen)
         self.image_name = "source_material/prop/ice.png"
+        self.prop_name = "ice"
 
 
 # 攻速加成道具
@@ -102,6 +106,7 @@ class HitSpeedProp(AttackProp):
     def __init__(self, screen):
         AttackProp.__init__(self, screen)
         self.image_name = "source_material/prop/hit_speed.png"
+        self.prop_name = "hit_speed"
 
 
 # HP回复道具
@@ -109,6 +114,7 @@ class HPProp(OtherProp):
     def __init__(self, screen):
         OtherProp.__init__(self, screen)
         self.image_name = "source_material/prop/HP.png"
+        self.prop_name = "HP"
 
 
 # 生命数增加道具
@@ -116,6 +122,7 @@ class LifeProp(OtherProp):
     def __init__(self, screen):
         OtherProp.__init__(self, screen)
         self.image_name = "source_material/prop/life.png"
+        self.prop_name = "life"
 
 
 # 移速加成道具
@@ -123,6 +130,7 @@ class MoveSpeedProp(OtherProp):
     def __init__(self, screen):
         OtherProp.__init__(self, screen)
         self.image_name = "source_material/prop/move_speed.png"
+        self.prop_name = "move_speed"
 
 
 # 基地HP回复道具
@@ -130,6 +138,7 @@ class BaseHPProp(OtherProp):
     def __init__(self, screen):
         OtherProp.__init__(self, screen)
         self.image_name = "source_material/prop/base_HP.png"
+        self.prop_name = "base_HP"
 
 
 # 金币道具
@@ -137,3 +146,4 @@ class CoinProp(OtherProp):
     def __init__(self, screen):
         OtherProp.__init__(self, screen)
         self.image_name = "source_material/prop/coin.png"
+        self.prop_name = "coin"
