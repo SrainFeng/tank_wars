@@ -195,7 +195,6 @@ while True:
             if e:
                 explode.add(e)
             pr = tank2.open(current_time, screen_pos)
-            print(pr)
             AI.kill()
             props.add(pr)
             tank2 = tank_classes.PropCar(screen)

@@ -12,8 +12,11 @@ class TankGame:
         self.AI_tank_num_in_map = 0
         self.is_continue = True
         self.ordinary_tank_num = 20
+        self.last_o_tk = 20
         self.speed_tank_num = 10
+        self.last_s_tk = 10
         self.armoured_tank_num = 10
+        self.last_a_tk = 10
         self.is_game_over = False
         self.last_prop_car_time = 0
         self.prop_car_num = 0
@@ -237,10 +240,11 @@ class TankGame:
     def birth_ai_tank(self, screen, birth_poses, ai_tank, player_tank, prop_car, screen_pos, current_time, car_pos):
         pos_c = randint(0, 2)
         birth_pos = birth_poses[pos_c].copy()
-        if (self.AI_tank_num_in_map < self.mix_AI) and (self.speed_tank_num > 0) and (self.ordinary_tank_num > 0) and (self.armoured_tank_num > 0):
-            c = randint(0, 3)
+        if (self.AI_tank_num_in_map < self.mix_AI) and ((self.speed_tank_num > 0) or (self.ordinary_tank_num > 0) or (self.armoured_tank_num > 0)):
             a = True
             while a:
+                c = randint(0, 3) 
+                print(self.ordinary_tank_num)
                 if c == 0 and self.speed_tank_num > 0:
                     tank = tank_classes.SpeedTank(screen)
                     tank.birth(birth_pos, player_tank, screen_pos)
@@ -254,11 +258,12 @@ class TankGame:
                     self.armoured_tank_num -= 1
                     a = False
                 else:
-                    tank = tank_classes.OrdinaryTank(screen)
-                    tank.birth(birth_pos, player_tank, screen_pos)
-                    ai_tank.add(tank)
-                    self.ordinary_tank_num -= 1
-                    a = False
+                    if self.ordinary_tank_num > 0:
+                        tank = tank_classes.OrdinaryTank(screen)
+                        tank.birth(birth_pos, player_tank, screen_pos)
+                        ai_tank.add(tank)
+                        self.ordinary_tank_num -= 1
+                        a = False
             self.AI_tank_num_in_map += 1
         if (self.last_prop_car_time + 10000 < current_time) and (self.prop_car_num < 3):
             print(self.last_prop_car_time, current_time)
@@ -311,6 +316,12 @@ class TankGame:
                 e = AI.explode(screen_pos)
                 if e:
                     groups["explode"].add(e)
+                if AI.tank_type == "o":
+                    self.last_o_tk -= 1
+                elif AI.tank_type == "s":
+                    self.last_s_tk -= 1
+                elif AI.tank_type == "a":
+                    self.last_a_tk -= 1
                 AI.kill()
                 self.AI_tank_num_in_map -= 1
         groups["AI_tank"].update(current_time, time_passed_second, screen_pos)

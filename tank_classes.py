@@ -387,6 +387,7 @@ class AITank(Tank):
 class OrdinaryTank(AITank):
     def __init__(self, screen):
         AITank.__init__(self, screen)
+        self.tank_type = "o"
         self.HP = 6
         self.move_speed = 80
         self.hit_speed = 1000
@@ -397,6 +398,7 @@ class OrdinaryTank(AITank):
 class SpeedTank(AITank):
     def __init__(self, screen):
         AITank.__init__(self, screen)
+        self.tank_type = "s"
         self.HP = 4
         self.move_speed = 100
         self.hit_speed = 1000
@@ -407,6 +409,7 @@ class SpeedTank(AITank):
 class ArmouredTank(AITank):
     def __init__(self, screen):
         AITank.__init__(self, screen)
+        self.tank_type = "a"
         self.HP = 10
         self.move_speed = 50
         self.hit_speed = 500

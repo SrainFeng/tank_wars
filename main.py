@@ -13,6 +13,14 @@ menu_background = "source_material/main_menu/background.png"
 menu_button = "source_material/main_menu/button.png"
 map1 = "map/map1.tmx"
 
+# 游戏界面UI
+electricity_num_name = "source_material/UI/electricity_num.png"
+fire_num_name = "source_material/UI/fire_num.png"
+ice_num_name = "source_material/UI/ice_num.png"
+life_UI_name = "source_material/UI/life.png"
+a_tank_name = "source_material/UI/a_tk.png"
+s_tank_name = "source_material/UI/s_tk.png"
+o_tank_name = "source_material/UI/o_tk.png"
 
 # 初始化 pygame 的一些内置数据
 pygame.init()
@@ -39,9 +47,16 @@ while True:
     if mouse_pressed[0] and (330 < mouse_pos[0] < 470) and (400 < mouse_pos[1] < 424):
         # 创建一些游戏中的精灵组,存在一个字典中
         groups = game.TankGame.create_sprite_groups()
-        print(groups)
         # 用于绘制滚动地图的 Surface 对象
         map_surface = pygame.Surface((832, 512), 0, 32)
+        font = pygame.font.Font("李旭科书法1.4.ttf", 40)
+        electricity_num = pygame.image.load(electricity_num_name).convert_alpha()
+        fire_num = pygame.image.load(fire_num_name).convert_alpha()
+        ice_num = pygame.image.load(ice_num_name).convert_alpha()
+        life_num = pygame.image.load(life_UI_name).convert_alpha()
+        a_tank = pygame.image.load(a_tank_name).convert_alpha()
+        s_tank = pygame.image.load(s_tank_name).convert_alpha()
+        o_tank = pygame.image.load(o_tank_name).convert_alpha()
 
         # 读取地图中的对象层
         # 基地与玩家
@@ -136,6 +151,36 @@ while True:
             # 绘制所有精灵
             for value in groups.values():
                 value.draw(screen)
+
+            life_text_surface = font.render(str(new_game.player.life), True, (0, 0, 0))
+            fire_text_surface = font.render(str(new_game.player.tank.fire_num), True, (0, 0, 0))
+            electricity_text_surface = font.render(str(new_game.player.tank.electricity_num), True, (0, 0, 0))
+            ice_text_surface = font.render(str(new_game.player.tank.ice_num), True, (0, 0, 0))
+            o_tank_text_surface = font.render(str(new_game.last_o_tk), True, (0, 0, 0))
+            s_tank_text_surface = font.render(str(new_game.last_s_tk), True, (0, 0, 0))
+            a_tank_text_surface = font.render(str(new_game.last_a_tk), True, (0, 0, 0))
+
+            # 玩家状态
+            screen.blit(life_num, (10, 10))
+            screen.blit(life_text_surface, (50, 10))
+            screen.blit(fire_num, (10, 50))
+            screen.blit(fire_text_surface, (50, 50))
+            screen.blit(electricity_num, (10, 90))
+            screen.blit(electricity_text_surface, (50, 90))
+            screen.blit(ice_num, (10, 130))
+            screen.blit(ice_text_surface, (50, 130))
+            # 绘制玩家血条
+            HP_bar_health = Rect(90, 30, new_game.player.tank.HP / 10 * 100, 10)
+            HP_bar = Rect(90, 30, 100, 10)
+            pygame.draw.rect(screen, (255, 0, 0), HP_bar)
+            pygame.draw.rect(screen, (0, 255, 0), HP_bar_health)
+            # 剩余敌人数量
+            screen.blit(o_tank, (700, 10))
+            screen.blit(o_tank_text_surface, (740, 10))
+            screen.blit(s_tank, (700, 50))
+            screen.blit(s_tank_text_surface, (740, 50))
+            screen.blit(a_tank, (700, 90))
+            screen.blit(a_tank_text_surface, (740, 90))
 
             '''groups["player_tank"].draw(screen)
             # AI坦克
