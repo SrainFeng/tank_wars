@@ -8,7 +8,9 @@ from random import randint
 class TankGame:
     def __init__(self, player):
         self.player = player
+        # 地图上最多拥有的AI坦克数量
         self.mix_AI = 10
+        # 目前地图上拥有的坦克数量
         self.AI_tank_num_in_map = 0
         self.is_continue = True
         self.ordinary_tank_num = 20
@@ -20,6 +22,7 @@ class TankGame:
         self.is_game_over = False
         self.last_prop_car_time = 0
         self.prop_car_num = 0
+        self.is_win = None
 
     @classmethod
     def create_sprite_groups(cls):
@@ -155,6 +158,24 @@ class TankGame:
                 car.stop()
                 car.strike()
 
+        # 玩家与边界碰撞
+        for tank in groups["player_tank"].sprites():
+            if tank.map_rect.collidelist(map_borders) != -1:
+                tank.stop()
+
+        # 玩家坦克与AI碰撞
+        for tank in groups["player_tank"].sprites():
+            for AI in groups["AI_tank"].sprites():
+                if tank.map_rect.colliderect(AI.map_rect):
+                    AI.stop()
+                    AI.strike()
+                    tank.stop()
+            for car in groups["prop_car"].sprites():
+                if tank.map_rect.colliderect(car.map_rect):
+                    car.stop()
+                    car.strike()
+                    tank.stop()
+
         # AI与地图障碍的碰撞
         for AI in groups["AI_tank"].sprites():
             if AI.map_rect.collidelist(can_pass) != -1:
@@ -207,7 +228,7 @@ class TankGame:
                     elif prop.prop_name == "base_HP":
                         base.hp_up(8)
                     elif prop.prop_name == "coin":
-                        self.player.mark_up(10)
+                        self.player.mark_up(1000)
                     else:
                         tank.get_speed_up(prop.prop_name, current_time)
                     prop.kill()
@@ -274,6 +295,9 @@ class TankGame:
             self.prop_car_num += 1
 
             self.last_prop_car_time = current_time
+        if (self.last_o_tk <= 0) and (self.last_a_tk <= 0) and (self.last_s_tk <= 0):
+            self.is_game_over = True
+            self.is_win = True
 
     def death_detection_handle(self, screen, groups, current_time, time_passed_second, screen_pos, player_birth_pos, move):
         # 玩家子弹死亡检测
@@ -307,7 +331,11 @@ class TankGame:
             if tank.is_dead():
                 tank.kill()
                 p_tank = self.player.birth_a_tank(screen, Vector2(400, 240), current_time, player_birth_pos["player"])
-                groups["player_tank"].add(p_tank)
+                if p_tank:
+                    groups["player_tank"].add(p_tank)
+                else:
+                    self.is_game_over = True
+                    self.is_win = False
         groups["player_tank"].update(current_time, time_passed_second, move, screen_pos)
 
         # AI死亡检测
@@ -323,6 +351,7 @@ class TankGame:
                 elif AI.tank_type == "a":
                     self.last_a_tk -= 1
                 AI.kill()
+                self.player.mark_up(100)
                 self.AI_tank_num_in_map -= 1
         groups["AI_tank"].update(current_time, time_passed_second, screen_pos)
 
@@ -345,6 +374,7 @@ class TankGame:
                 groups["explode"].add(e)
                 b.kill()
                 self.is_game_over = True
+                self.is_win = False
         groups["base"].update(screen_pos)
 
         # 道具死亡检测

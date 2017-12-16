@@ -1,5 +1,4 @@
 import pygame
-from gameobjects.vector2 import Vector2
 
 
 class TankSprite(pygame.sprite.Sprite):
@@ -38,6 +37,3 @@ class TankSprite(pygame.sprite.Sprite):
         self.columns = column
         master_size = self.master_image.get_rect()
         self.last_frame = (master_size.width // width) * (master_size.height // height) - 1
-
-    def update(self):
-        pass

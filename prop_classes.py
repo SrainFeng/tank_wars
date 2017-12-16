@@ -1,6 +1,5 @@
 import tank_sprite
 from pygame.locals import *
-from gameobjects.vector2 import Vector2
 
 
 class Prop(tank_sprite.TankSprite):

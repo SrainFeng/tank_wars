@@ -93,4 +93,3 @@ class MedicineSupplyBox(Box):
             prop = prop_classes.MoveSpeedProp(self.target_surface)
             prop.produce(self.map_pos, current_time, self.screen_pos)
         return prop
-

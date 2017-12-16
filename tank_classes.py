@@ -94,7 +94,7 @@ class PlayerTank(Tank):
         self.HP = 10
         self.hit_speed = 500
         self.special_hit_speed = 1000
-        self.move_speed = 100
+        self.move_speed = 300
         self.image_name = "source_material/tanks/player.png"
         self.birth_time = 0
         # 无敌的持续时间（毫秒）
